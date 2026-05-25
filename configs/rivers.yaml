@@ -1,0 +1,82 @@
+rivers:
+  Ob:
+    canonical_name: Ob
+    aliases: ["Ob", "Ob'", "Ob River", "Ob' River"]
+    arcticgro_station_names: ["Salekhard"]
+    discharge_station_names: ["Salekhard"]
+    approximate_station_latitude: 66.62
+    approximate_station_longitude: 66.60
+    country_or_region: Russia
+    target_mainstem_notes: "ArcticGRO mainstem sampling near Salekhard; use configured coordinates as station metadata, not basin geometry."
+    roi_paths: {}
+    wqp_query_hints: {}
+    datastream_query_hints: {}
+  Yenisey:
+    canonical_name: Yenisey
+    aliases: ["Yenisey", "Yenisei", "Enisey"]
+    arcticgro_station_names: ["Dudinka"]
+    discharge_station_names: ["Igarka"]
+    approximate_station_latitude: 69.37
+    approximate_station_longitude: 86.18
+    country_or_region: Russia
+    target_mainstem_notes: "Water quality station is Dudinka; discharge station is Igarka."
+    roi_paths: {}
+    wqp_query_hints: {}
+    datastream_query_hints: {}
+  Lena:
+    canonical_name: Lena
+    aliases: ["Lena"]
+    arcticgro_station_names: ["Zhigansk"]
+    discharge_station_names: ["Kusur", "Kyusyur"]
+    approximate_station_latitude: 66.77
+    approximate_station_longitude: 123.37
+    country_or_region: Russia
+    target_mainstem_notes: "Water quality station is Zhigansk; discharge station is Kusur/Kyusyur."
+    roi_paths: {}
+    wqp_query_hints: {}
+    datastream_query_hints: {}
+  Kolyma:
+    canonical_name: Kolyma
+    aliases: ["Kolyma"]
+    arcticgro_station_names: ["Cherskiy", "Chersky"]
+    discharge_station_names: ["Kolymskoe", "Srednekolymsk"]
+    approximate_station_latitude: 68.75
+    approximate_station_longitude: 161.30
+    country_or_region: Russia
+    target_mainstem_notes: "Water quality station is Cherskiy; discharge products include Kolymskoe and Srednekolymsk variants."
+    roi_paths: {}
+    wqp_query_hints: {}
+    datastream_query_hints: {}
+  Yukon:
+    canonical_name: Yukon
+    aliases: ["Yukon", "Yukon River"]
+    arcticgro_station_names: ["Pilot Station"]
+    discharge_station_names: ["Pilot Station"]
+    approximate_station_latitude: 61.93
+    approximate_station_longitude: -162.88
+    country_or_region: Alaska, United States
+    target_mainstem_notes: "Mainstem Yukon near Pilot Station, Alaska."
+    roi_paths: {}
+    wqp_query_hints:
+      countrycode: "US"
+      statecode: "US:02"
+      site_type: "Stream"
+      bBox: "-164.2,61.2,-161.4,62.6"
+      organization: "USGS-AK"
+      station_name_contains: ["Yukon", "Pilot"]
+    datastream_query_hints: {}
+  Mackenzie:
+    canonical_name: Mackenzie
+    aliases: ["Mackenzie", "Mackenzie River"]
+    arcticgro_station_names: ["Tsiigehtchic"]
+    discharge_station_names: ["Arctic Red River"]
+    approximate_station_latitude: 67.45
+    approximate_station_longitude: -133.74
+    country_or_region: Northwest Territories, Canada
+    target_mainstem_notes: "Water quality station is Tsiigehtchic; discharge station is Arctic Red River."
+    roi_paths: {}
+    wqp_query_hints: {}
+    datastream_query_hints:
+      hub: "Mackenzie"
+      terms: ["Mackenzie River", "DOC", "TOC", "CDOM", "UV", "turbidity"]
+

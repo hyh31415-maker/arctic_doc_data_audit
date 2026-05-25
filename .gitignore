@@ -1,0 +1,33 @@
+# Local environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Raw and generated data are reproducible outputs and must not be committed.
+data/raw/
+data/raw_external/
+data/interim/
+data/processed/
+
+# Keep lightweight manifests, reports, and examples visible.
+!data/manifests/
+!data/manifests/*.csv
+!data/manifests/*.json
+outputs/logs/
+outputs/tables/
+outputs/figures/
+outputs/models/
+outputs/**/*.parquet
+outputs/**/*.xlsx
+outputs/**/*.zip
+outputs/**/*.pkl
+outputs/**/*.joblib
+
+# Local-only configuration
+configs/local_paths.yaml
+.env

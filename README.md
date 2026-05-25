@@ -1,0 +1,90 @@
+# arctic_doc_data_audit
+
+Clean data acquisition and preprocessing code for Arctic river DOC / CDOM / discharge / optical proxy / hydroclimate integration.
+
+This repository is a data-layer rebuild only. It downloads, audits, standardizes, deduplicates, joins, and reports data readiness for later Arctic river DOC / snowmelt / flux modeling. It does not train DOC models and does not make final scientific claims.
+
+## Data Roles
+
+- DOC labels: field DOC observations suitable for future model labels after QC.
+- TOC labels: retained separately and flagged with `is_toc_not_doc=true`; never silently converted to DOC.
+- Daily predictors: discharge and hydroclimate variables that can be known or reconstructed as continuous daily predictors.
+- Lab optical proxy: ArcticGRO absorbance/CDOM variables such as A254, A375, A440, SUVA, and spectral slopes.
+- Satellite optical proxy: HLS, Sentinel-2, and Landsat reflectance-derived optical time series.
+- Basin context: HydroBASINS/HydroATLAS attributes and local basin metadata.
+- Benchmark products: fixed-version literature or data packages used for validation after duplicate/provenance audit.
+
+Lab absorbance/CDOM is not included as a production daily flux-model predictor because it is sample-tied laboratory information, not a continuous daily variable available for every prediction date. It can support DOC-CDOM mechanism checks and satellite optical interpretation. Satellite reflectance is also an optical proxy, not a direct DOC observation.
+
+## Quick Start
+
+```powershell
+python -m pip install -e .[test]
+python -m arctic_doc_data_audit.cli init
+python -m arctic_doc_data_audit.cli download --source arcticgro --dry-run
+python -m arctic_doc_data_audit.cli download --source arcticgro
+python -m arctic_doc_data_audit.cli preprocess --all
+python -m arctic_doc_data_audit.cli build-training-matrix
+python -m arctic_doc_data_audit.cli report
+python -m pytest
+```
+
+Equivalent Make targets are available:
+
+```powershell
+make init
+make download-arcticgro
+make download-candidates
+make preprocess
+make build-matrix
+make report
+make test
+```
+
+## Outputs
+
+- `data/manifests/source_registry.csv`
+- `data/manifests/file_manifest.csv`
+- `data/processed/doc_labels_raw.csv`
+- `data/processed/doc_labels_canonical.csv`
+- `data/processed/lab_optical_proxy_canonical.csv`
+- `data/processed/daily_discharge_canonical.csv`
+- `data/processed/daily_hydroclimate_canonical.csv`
+- `data/processed/optical_timeseries_canonical.csv`
+- `data/processed/basin_context_canonical.csv`
+- `data/processed/training_matrix_daily_predictable.csv`
+- `outputs/reports/data_availability_report.md`
+- `outputs/reports/provenance_report.md`
+
+Raw, interim, and processed data directories are gitignored. Manifests and reports are lightweight audit artifacts and may be committed when they contain no sensitive local paths.
+
+## Manual Data
+
+For manual HydroBASINS/HydroATLAS or Arctic Data Center files, create `configs/local_paths.yaml`:
+
+```yaml
+hydrobasins:
+  local_path: "D:/path/to/hydrobasins_file.geojson"
+hydroatlas:
+  local_path: "D:/path/to/hydroatlas_attributes.csv"
+arctic_data_center_tank_2023:
+  local_path: "D:/path/to/unpacked/package"
+```
+
+The file is gitignored. The parser records the local artifact in manifest/provenance but does not commit the data.
+
+## Old Project Reference Import
+
+Set `OLD_PROJECT_DIR` to a local checkout of the old project to copy selected non-raw reference tables into `data/interim/reference_old_project/`:
+
+```powershell
+$env:OLD_PROJECT_DIR="D:/Hao/Desktop/冰冻圈水文/北极大河DOC/arctic_doc_snowmelt"
+python -m arctic_doc_data_audit.cli download --source old_project
+```
+
+Imported old files are reference-only. They are never treated as authoritative labels until regenerated from raw sources.
+
+## Future Training Inputs
+
+Future modeling code should read `doc_labels_canonical.csv`, `daily_discharge_canonical.csv`, `daily_hydroclimate_canonical.csv`, `optical_timeseries_canonical.csv`, and `basin_context_canonical.csv`. The prepared `training_matrix_daily_predictable.csv` intentionally excludes lab absorbance/CDOM columns and is only a future input table, not a model result.
+

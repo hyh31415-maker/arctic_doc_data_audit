@@ -1,0 +1,304 @@
+sources:
+  - source_id: arcticgro_data_page
+    source_family: ArcticGRO
+    data_role: registry
+    source_url: https://arcticgreatrivers.org/data/
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Discover links and version codes from the official data page."
+    raw_commit_allowed: false
+    notes: "Official entry point. ArcticGRO asks users to credit the project; data page states datasets are frequently updated and versioned YYYYMMDD."
+    local_subdir: data/raw/arcticgro
+
+  - source_id: arcticgro_water_quality_current
+    source_family: ArcticGRO
+    data_role: DOC/TOC labels and sample chemistry
+    source_url: https://arcticgreatrivers.org/water_data/
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Use page text or workbook VERSION row."
+    raw_commit_allowed: false
+    notes: "Current Water Quality workbook; DOC is a candidate label, Axxx columns are lab optical proxies."
+    local_subdir: data/raw/arcticgro/water_quality
+    discover_from_source_id: arcticgro_data_page
+    discover_anchor_text: ["Water Quality"]
+    preferred_export_format: xlsx
+
+  - source_id: arcticgro_water_quality_archived
+    source_family: ArcticGRO
+    data_role: archived labels and chemistry
+    source_url: https://drive.google.com/drive/folders/1OeFu50hfKCoYZlf844pqMx1rNajsnF63
+    official_or_secondary: official
+    expected_update_frequency: historical
+    version_policy: "Record available archive folder; do not bulk-download Drive folders automatically."
+    raw_commit_allowed: false
+    notes: "Archived versions. Manual acquisition may be needed."
+    local_subdir: data/raw/arcticgro/archived
+
+  - source_id: arcticgro_water_quality_metadata
+    source_family: ArcticGRO
+    data_role: metadata
+    source_url: https://drive.google.com/file/d/1C4uWkAxr6KRaInMTsGL1CQSApFOSDz4B/view
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Version may be embedded in file name or PDF text."
+    raw_commit_allowed: false
+    notes: "Comprehensive ArcticGRO metadata PDF from official data page."
+    local_subdir: data/raw/arcticgro/metadata
+
+  - source_id: arcticgro_water_quality_parameter_descriptions
+    source_family: ArcticGRO
+    data_role: metadata
+    source_url: https://docs.google.com/spreadsheets/d/1b7T75PqEQIcNNBBeF0Ot1USRFcb9gUEjPfAQnP_1r40/edit?gid=2004373548
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Use workbook VERSION row where available."
+    raw_commit_allowed: false
+    notes: "Parameter descriptions linked from the Water Quality page."
+    local_subdir: data/raw/arcticgro/metadata
+    preferred_export_format: xlsx
+
+  - source_id: arcticgro_water_quality_flags
+    source_family: ArcticGRO
+    data_role: metadata
+    source_url: https://arcticgreatrivers.org/water_data/
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Extract Flag codes sheet from Water Quality workbook and flag definition text from page."
+    raw_commit_allowed: false
+    notes: "Flag definitions must be kept separate from labels."
+    local_subdir: data/interim/arcticgro/metadata
+
+  - source_id: arcticgro_absorbance_current
+    source_family: ArcticGRO
+    data_role: lab optical proxy
+    source_url: https://docs.google.com/spreadsheets/d/1XJlxxnbL6ddSPWNH4YNcKkn29sVeoiCS0Cz6OyrBad4/edit
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Use workbook VERSION row."
+    raw_commit_allowed: false
+    notes: "Lab absorbance/CDOM proxy. Defaults to validation-only, not daily predictor."
+    local_subdir: data/raw/arcticgro/absorbance
+    discover_from_source_id: arcticgro_data_page
+    discover_anchor_text: ["Absorbance"]
+    preferred_export_format: xlsx
+
+  - source_id: arcticgro_absorbance_archived
+    source_family: ArcticGRO
+    data_role: archived lab optical proxy
+    source_url: https://drive.google.com/drive/folders/1OeFu50hfKCoYZlf844pqMx1rNajsnF63
+    official_or_secondary: official
+    expected_update_frequency: historical
+    version_policy: "Record archive acquisition instructions."
+    raw_commit_allowed: false
+    notes: "Archived absorbance versions."
+    local_subdir: data/raw/arcticgro/archived
+
+  - source_id: arcticgro_discharge_current
+    source_family: ArcticGRO
+    data_role: daily discharge
+    source_url: https://arcticgreatrivers.org/discharge/
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Use embedded xlsx filenames, Version_YYYYMMDD."
+    raw_commit_allowed: false
+    notes: "Current daily discharge workbooks are embedded in official discharge page."
+    local_subdir: data/raw/arcticgro/discharge
+    discharge_workbooks:
+      Ob: Ob_Salekhard_Version_20260210.xlsx
+      Yenisey: Yenisei_Igarka_Version_20260210.xlsx
+      Lena: Lena_Kyusyur_Version_20260210.xlsx
+      Kolyma: Kolyma_Kolymskoe_Version_20260210.xlsx
+      Yukon: Yukon_PilotStation_Version_20260210.xlsx
+      Mackenzie: Mackenzie_ArcticRedRiver_Version_20260210.xlsx
+
+  - source_id: arcticgro_discharge_archived
+    source_family: ArcticGRO
+    data_role: archived daily discharge
+    source_url: https://drive.google.com/drive/folders/1OeFu50hfKCoYZlf844pqMx1rNajsnF63
+    official_or_secondary: official
+    expected_update_frequency: historical
+    version_policy: "Record archive acquisition instructions."
+    raw_commit_allowed: false
+    notes: "Archived discharge versions."
+    local_subdir: data/raw/arcticgro/archived
+
+  - source_id: arcticgro_spatial_data
+    source_family: ArcticGRO
+    data_role: spatial context
+    source_url: https://drive.google.com/drive/folders/1S-MAqA9ahewFhOb8yHEmMc-JC9jX6rwC
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Record folder URL unless manual files are supplied."
+    raw_commit_allowed: false
+    notes: "Spatial data are context only, not DOC labels."
+    local_subdir: data/raw/arcticgro/spatial
+
+  - source_id: old_arctic_doc_snowmelt_outputs
+    source_family: old_project
+    data_role: reference only
+    source_url: env:OLD_PROJECT_DIR
+    official_or_secondary: secondary
+    expected_update_frequency: none
+    version_policy: "Copy selected non-raw reference outputs only when OLD_PROJECT_DIR exists."
+    raw_commit_allowed: false
+    notes: "Reference tables must be regenerated from raw sources before becoming authoritative."
+    local_subdir: data/interim/reference_old_project
+    selected_files:
+      - outputs/tables/extended_doc_label_inventory.csv
+      - outputs/tables/arcticgro_extended_doc_labels.csv
+      - outputs/tables/arcticgro_absorbance_doc_features.csv
+      - outputs/tables/multiriver_run_summary.csv
+
+  - source_id: arctic_data_center_tank_2023
+    source_family: Arctic Data Center
+    data_role: benchmark fixed-version package
+    source_url: https://doi.org/10.18739/A2VH5CK43
+    official_or_secondary: official
+    expected_update_frequency: fixed DOI
+    version_policy: "Resolve DOI and preserve DOI/package metadata; treat as benchmark until provenance audit."
+    raw_commit_allowed: false
+    notes: "Do not merge into training labels until duplicate and provenance audit is complete."
+    local_subdir: data/raw_external/arctic_data_center/tank_2023
+    doi: 10.18739/A2VH5CK43
+
+  - source_id: wqp_usgs_yukon_candidate
+    source_family: WQP/USGS
+    data_role: candidate external label/proxy observations
+    source_url: https://www.waterqualitydata.us/
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Use retrieved_at_utc and query URL; WQP is a live service."
+    raw_commit_allowed: false
+    notes: "Candidate only. DOC/TOC/CDOM/UV/turbidity results need site, method, medium, and fraction QC."
+    local_subdir: data/raw_external/wqp_usgs
+    characteristics:
+      - Dissolved organic carbon
+      - Organic carbon
+      - Total organic carbon
+      - Dissolved organic matter
+      - UV Absorbance
+      - Absorbance at 254 nm
+      - Specific ultraviolet absorbance
+      - Color
+      - Turbidity
+      - Suspended sediment concentration
+      - Water temperature
+      - Discharge
+
+  - source_id: datastream_mackenzie_candidate
+    source_family: DataStream
+    data_role: candidate external label/proxy observations
+    source_url: https://datastream.org/en-ca/documentation/api
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Use API response metadata and retrieved_at_utc."
+    raw_commit_allowed: false
+    notes: "Candidate only. Basin observations are not assumed mainstem-comparable."
+    local_subdir: data/raw_external/datastream_mackenzie
+
+  - source_id: partners_mdpi_eurasian_candidate
+    source_family: literature supplementary
+    data_role: supplementary mechanism or candidate labels
+    source_url: https://www.mdpi.com/
+    official_or_secondary: secondary
+    expected_update_frequency: fixed publication
+    version_policy: "Preserve article citation, DOI, supplement file names, and retrieved_at_utc."
+    raw_commit_allowed: false
+    notes: "Parse conservatively; duplicate/provenance audit required before label use."
+    local_subdir: data/raw_external/partners_mdpi
+
+  - source_id: gee_hls_s30_l30
+    source_family: Google Earth Engine
+    data_role: satellite optical proxy
+    source_url: https://developers.google.com/earth-engine/datasets/catalog/NASA_HLS_HLSS30_v002
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Collection IDs and image IDs define versions."
+    raw_commit_allowed: false
+    notes: "HLS optical proxy only. Use Fmask bits. Dry-run/report-only unless EE is authenticated."
+    gee_collections: ["NASA/HLS/HLSS30/v002", "NASA/HLS/HLSL30/v002"]
+    local_subdir: data/interim/gee_optical
+
+  - source_id: gee_sentinel2_sr_harmonized
+    source_family: Google Earth Engine
+    data_role: satellite optical proxy
+    source_url: https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Collection and image IDs define versions."
+    raw_commit_allowed: false
+    notes: "Sentinel-2 optical proxy only. Use SCL / QA cloud-snow-water logic."
+    gee_collections: ["COPERNICUS/S2_SR_HARMONIZED"]
+    local_subdir: data/interim/gee_optical
+
+  - source_id: gee_landsat_c2_l2
+    source_family: Google Earth Engine
+    data_role: satellite optical proxy
+    source_url: https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Collection and image IDs define versions."
+    raw_commit_allowed: false
+    notes: "Landsat C2 optical proxy only. Use QA_PIXEL."
+    gee_collections: ["LANDSAT/LT05/C02/T1_L2", "LANDSAT/LE07/C02/T1_L2", "LANDSAT/LC08/C02/T1_L2", "LANDSAT/LC09/C02/T1_L2"]
+    local_subdir: data/interim/gee_optical
+
+  - source_id: gee_era5_land
+    source_family: Google Earth Engine
+    data_role: daily hydroclimate predictor
+    source_url: https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_LAND_HOURLY
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Collection and date define versions."
+    raw_commit_allowed: false
+    notes: "Daily hydroclimate predictors only."
+    gee_collections: ["ECMWF/ERA5_LAND/HOURLY"]
+    local_subdir: data/interim/gee_hydroclimate
+
+  - source_id: gee_modis_mod10a1
+    source_family: Google Earth Engine
+    data_role: daily snow predictor
+    source_url: https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MOD10A1
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Collection and date define versions."
+    raw_commit_allowed: false
+    notes: "Use NDSI_Snow_Cover and mask invalid provider values >100."
+    gee_collections: ["MODIS/061/MOD10A1"]
+    local_subdir: data/interim/gee_hydroclimate
+
+  - source_id: gee_smap_context_optional
+    source_family: Google Earth Engine
+    data_role: optional context predictor
+    source_url: https://developers.google.com/earth-engine/datasets/catalog/NASA_SMAP_SPL3SMP_E_006
+    official_or_secondary: official
+    expected_update_frequency: frequent
+    version_policy: "Collection and date define versions."
+    raw_commit_allowed: false
+    notes: "Optional basin context; not required for core training matrix."
+    gee_collections: ["NASA/SMAP/SPL3SMP_E/006"]
+    local_subdir: data/interim/gee_hydroclimate
+
+  - source_id: hydrobasins
+    source_family: HydroSHEDS
+    data_role: basin context
+    source_url: https://www.hydrosheds.org/products/hydrobasins
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Check size/license before download; prefer local_paths.yaml for manual files."
+    raw_commit_allowed: false
+    notes: "Basin context, not DOC label data."
+    local_subdir: data/raw_external/hydrosheds
+
+  - source_id: hydroatlas
+    source_family: HydroSHEDS
+    data_role: basin context
+    source_url: https://www.hydrosheds.org/products/hydroatlas
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Check size/license before download; prefer local_paths.yaml for manual files."
+    raw_commit_allowed: false
+    notes: "Basin attributes, not DOC label data."
+    local_subdir: data/raw_external/hydrosheds
+

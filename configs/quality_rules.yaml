@@ -1,0 +1,25 @@
+doc_label_rules:
+  preferred_parameter: DOC
+  accepted_doc_units: ["mg/L", "mg C/L", "mgC/L", "mg/L as C", "ug/L", "ug C/L", "ug/L as C"]
+  toc_is_doc: false
+  tier_a_requires:
+    - explicit_doc_parameter
+    - clear_unit
+    - usable_quality_flag
+    - known_date
+    - known_river
+    - known_station
+  unusable_flags: ["DV", "NC", "NA"]
+  caution_flags: ["PV", "CAU", "BD", "CV"]
+deduplication:
+  duplicate_keys: ["river", "station", "date", "parameter_canonical", "sample_id"]
+  preference_order:
+    - official_arcticgro_current
+    - non_flagged
+    - explicit_doc
+    - complete_metadata
+    - newest_dataset_version
+training_matrix:
+  forbidden_lab_optical_predictors: ["A254", "A350", "A355", "A375", "A412", "A420", "A440", "SUVA254", "spectral_slope_275_295", "spectral_slope_350_400"]
+  require_daily_predictable_only: true
+

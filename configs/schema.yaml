@@ -1,0 +1,24 @@
+tables:
+  source_registry:
+    required_columns: [source_id, source_family, data_role, source_url, official_or_secondary, expected_update_frequency, version_policy, raw_commit_allowed, notes]
+  file_manifest:
+    required_columns: [source_id, source_url, resolved_url, download_url, retrieved_at_utc, local_path, file_name, file_size_bytes, sha256, version_detected, download_status, failure_reason, license_or_citation, commit_raw_data]
+  doc_labels_raw:
+    required_columns: [source_id, source_file, source_sheet, source_row, raw_river, raw_station, raw_date, raw_parameter, raw_value, raw_unit, raw_flag, raw_method, raw_medium, raw_fraction, raw_latitude, raw_longitude, raw_sample_id, notes]
+  doc_labels_canonical:
+    required_columns: [label_id, source_id, dataset_version, river, station, date, year, doy, latitude, longitude, parameter_canonical, value_mgC_L, original_value, original_unit, sample_id, method, medium, fraction, quality_flag, provenance_tier, usability_tier, can_train_doc_model, can_train_daily_flux_model, is_toc_not_doc, is_duplicate, duplicate_group_id, preferred_record, exclusion_reason, notes]
+  lab_optical_proxy_canonical:
+    required_columns: [optical_lab_id, source_id, dataset_version, river, station, date, sample_id, A254, A350, A355, A375, A412, A420, A440, SUVA254, spectral_slope_275_295, spectral_slope_350_400, units, method, quality_flag, can_be_daily_predictor, can_be_optical_validation, notes]
+  daily_discharge_canonical:
+    required_columns: [river, station, date, Q_m3s, source_id, dataset_version, original_value, original_unit, quality_flag, provenance_tier, notes]
+  daily_hydroclimate_canonical:
+    required_columns: [river, date, aggregation_geometry, aggregation_geometry_id, temperature_2m_C, precipitation_m, snow_depth_m, snowmelt_m, surface_runoff_m, subsurface_runoff_m, total_runoff_m, positive_degree_day_Cday, snow_cover_fraction, snow_depletion_rate_7d, source_id, notes]
+  roi_catalog:
+    required_columns: [river, roi_set, roi_path, roi_exists, roi_area_m2, roi_source, roi_risk, manual_review_required, notes]
+  optical_timeseries_canonical:
+    required_columns: [river, date, datetime, sensor, collection, processing_level, roi_set, pixel_size_m, blue, green, red, nir, swir1, swir2, ndwi, mndwi, red_green_ratio, green_blue_ratio, n_valid_water_pixels, n_total_pixels, pct_valid_water_pixels, cloud_snow_water_mask_method, image_id, source_id, quality_flag, notes]
+  basin_context_canonical:
+    required_columns: [river, basin_id, geometry_source, upstream_area_km2, hydroatlas_attributes_json, landcover_attributes_json, climate_aggregation_notes, source_id, notes]
+  training_matrix_daily_predictable:
+    required_columns: [label_id, river, date, DOC_mgC_L, Q_m3s, doy, sin_doy, cos_doy, temperature_2m_C, positive_degree_day_Cday, snow_cover_fraction, snow_depletion_rate_7d, surface_runoff_m, flushing_potential_index, dilution_potential_index, basin_context_available, optical_match_hls_available, optical_match_sentinel2_available, optical_match_landsat_available, provenance_tier, usability_tier]
+

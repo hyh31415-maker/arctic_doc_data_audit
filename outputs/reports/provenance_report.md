@@ -231,7 +231,7 @@ Every canonical table is expected to retain source_id, source file/sheet/row inf
 ### optical_timeseries_canonical
 | source_id                              |   rows |
 |:---------------------------------------|-------:|
-| old_arctic_doc_snowmelt_untrained_data |  47067 |
+| old_arctic_doc_snowmelt_untrained_data |  49362 |
 
 ### basin_context_canonical
 | source_id              |   rows |
@@ -276,7 +276,7 @@ Old snapshot files are audited from `old_arctic_doc_snowmelt_untrained_data`. Ra
 |:-----------------------------|:---------------------------------------|----------------:|
 | roi_catalog                  | old_arctic_doc_snowmelt_untrained_data |              39 |
 | daily_hydroclimate_canonical | old_arctic_doc_snowmelt_untrained_data |           25200 |
-| optical_timeseries_canonical | old_arctic_doc_snowmelt_untrained_data |           47067 |
+| optical_timeseries_canonical | old_arctic_doc_snowmelt_untrained_data |           49362 |
 | auxiliary_context_canonical  | old_arctic_doc_snowmelt_untrained_data |           86324 |
 
 ### Old Snapshot Raw Decisions
@@ -296,7 +296,7 @@ Old snapshot files are audited from `old_arctic_doc_snowmelt_untrained_data`. Ra
 | daily_discharge_canonical    | arcticgro_discharge_current            | 154370 |
 | daily_discharge_canonical    | old_arctic_doc_snowmelt_untrained_data |      0 |
 | daily_hydroclimate_canonical | old_arctic_doc_snowmelt_untrained_data |  25200 |
-| optical_timeseries_canonical | old_arctic_doc_snowmelt_untrained_data |  47067 |
+| optical_timeseries_canonical | old_arctic_doc_snowmelt_untrained_data |  49362 |
 | basin_context_canonical      | hydrobasins;hydroatlas                 |      6 |
 | basin_context_canonical      | old_arctic_doc_snowmelt_untrained_data |      0 |
 | roi_catalog                  | old_arctic_doc_snowmelt_untrained_data |     39 |

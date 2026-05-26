@@ -39,6 +39,17 @@ def _count_table(frame: pd.DataFrame, group_cols: list[str], value_name: str = "
     return frame.groupby(group_cols, dropna=False).size().reset_index(name=value_name)
 
 
+def _real_exclusions(labels: pd.DataFrame) -> pd.DataFrame:
+    if labels.empty or "exclusion_reason" not in labels.columns:
+        return pd.DataFrame(columns=list(labels.columns) if not labels.empty else ["river", "exclusion_reason"])
+    out = labels.copy()
+    reason = out["exclusion_reason"].fillna("").astype(str).str.strip()
+    valid = (reason != "") & ~reason.str.lower().isin({"nan", "none", "<na>", "nat"})
+    out = out.loc[valid].copy()
+    out["exclusion_reason"] = reason.loc[valid]
+    return out
+
+
 def _download_summary(manifest: pd.DataFrame) -> pd.DataFrame:
     if manifest.empty:
         return pd.DataFrame(columns=["source_id", "download_status", "file_count", "failure_reason"])
@@ -241,7 +252,7 @@ def generate_data_availability_report() -> Path:
         _md_table(_count_table(labels, ["is_duplicate", "preferred_record"], "records")),
         "",
         "## 11. Unavailable Records and Exclusion Reasons",
-        _md_table(_count_table(labels[labels["exclusion_reason"].astype(str) != ""] if not labels.empty else labels, ["river", "exclusion_reason"], "records")),
+        _md_table(_count_table(_real_exclusions(labels), ["river", "exclusion_reason"], "records")),
         "",
         "## 12. Future Training Recommendations",
         "- Recommended main training set: `training_matrix_daily_predictable.csv`, daily-predictable features only.",

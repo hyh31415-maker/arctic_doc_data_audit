@@ -57,12 +57,14 @@ ROI_SET_BY_NAME = {
 
 
 HYDRO_COLUMN_MAP = {
+    "temp2m_mean_k": "temperature_2m_C",
     "temp2m_mean_c": "temperature_2m_C",
     "temperature_2m_c": "temperature_2m_C",
     "precip_total_m": "precipitation_m",
     "precipitation_m": "precipitation_m",
     "snow_depth_mean_m": "snow_depth_m",
     "snow_depth_m": "snow_depth_m",
+    "snowmelt_total_m": "snowmelt_m",
     "snowmelt_m": "snowmelt_m",
     "surface_runoff_total_m": "surface_runoff_m",
     "surface_runoff_m": "surface_runoff_m",
@@ -75,6 +77,8 @@ HYDRO_COLUMN_MAP = {
     "snow_cover_fraction": "snow_cover_fraction",
     "snow_depletion_rate_7d": "snow_depletion_rate_7d",
 }
+
+HYDRO_QC_SIDECAR_COLUMNS = {"mean_ndsi_snow_cover", "valid_modis_pixels"}
 
 
 OPTICAL_COLUMN_MAP = {
@@ -211,7 +215,7 @@ def _target_table(family: str, file_name: str) -> tuple[bool, str, str]:
         return True, "roi_catalog", ""
     if family in {"era5", "modis", "hydroclimate"}:
         return True, "daily_hydroclimate_canonical", ""
-    if family == "hls":
+    if family in {"hls", "optical"}:
         return True, "optical_timeseries_canonical", ""
     if family in {"smap", "auxiliary"}:
         return True, "auxiliary_context_canonical", ""
@@ -509,6 +513,41 @@ def _numeric(value: Any) -> float | None:
     return float(parsed) if pd.notna(parsed) else None
 
 
+def _column_by_norm(columns: list[str] | pd.Index, normalized_name: str) -> str | None:
+    return next((column for column in columns if _norm(column) == normalized_name), None)
+
+
+def _first_numeric(row: pd.Series, columns: list[str] | pd.Index, normalized_names: list[str]) -> float | None:
+    for name in normalized_names:
+        column = _column_by_norm(columns, name)
+        if column is None:
+            continue
+        value = _numeric(row.get(column))
+        if value is not None:
+            return value
+    return None
+
+
+def _first_text(row: pd.Series, columns: list[str] | pd.Index, normalized_names: list[str]) -> str:
+    for name in normalized_names:
+        column = _column_by_norm(columns, name)
+        if column is None:
+            continue
+        value = clean_text(row.get(column))
+        if value:
+            return value
+    return ""
+
+
+def _hydro_value(source_col_norm: str, value: Any) -> float | None:
+    parsed = _numeric(value)
+    if parsed is None:
+        return None
+    if source_col_norm == "temp2m_mean_k":
+        return parsed - 273.15
+    return parsed
+
+
 def _river_from_frame(frame: pd.DataFrame, fallback: str) -> pd.Series:
     if "river" in frame.columns:
         return frame["river"].map(canonical_river)
@@ -534,7 +573,14 @@ def promote_hydroclimate(inventory: pd.DataFrame | None = None) -> pd.DataFrame:
         frame["_river"] = _river_from_frame(frame, fallback_river)
         frame["_date"] = pd.to_datetime(frame["date"], errors="coerce").dt.date.astype("string")
         mapped_cols = {_norm(column): HYDRO_COLUMN_MAP[_norm(column)] for column in frame.columns if _norm(column) in HYDRO_COLUMN_MAP}
-        unmapped = [column for column in frame.columns if column not in {"_river", "_date"} and _norm(column) not in HYDRO_COLUMN_MAP and column not in mapped_source_columns]
+        unmapped = [
+            column
+            for column in frame.columns
+            if column not in {"_river", "_date"}
+            and _norm(column) not in HYDRO_COLUMN_MAP
+            and _norm(column) not in HYDRO_QC_SIDECAR_COLUMNS
+            and column not in mapped_source_columns
+        ]
         if unmapped:
             unmapped_rows.append(
                 {
@@ -542,6 +588,13 @@ def promote_hydroclimate(inventory: pd.DataFrame | None = None) -> pd.DataFrame:
                     "original_relative_path": record["original_relative_path"],
                     "inferred_product_family": record["inferred_product_family"],
                     "unmapped_columns_json": _safe_json(unmapped),
+                    "river": "",
+                    "date": "",
+                    "variable": "",
+                    "value": "",
+                    "unit": "",
+                    "canonical_field": "",
+                    "disposition": "file_level_unmapped_columns",
                     "notes": "columns retained outside daily_hydroclimate_canonical",
                 }
             )
@@ -574,13 +627,70 @@ def promote_hydroclimate(inventory: pd.DataFrame | None = None) -> pd.DataFrame:
                     "original_relative_path": set(),
                     "sha256": set(),
                     "notes": set(),
+                    "_converted_fields": set(),
                 },
             )
             for source_col_norm, target_col in mapped_cols.items():
                 source_col = next(column for column in frame.columns if _norm(column) == source_col_norm)
-                value = _numeric(row.get(source_col))
-                if value is not None and pd.isna(target.get(target_col)):
+                value = _hydro_value(source_col_norm, row.get(source_col))
+                converted_field = target_col in target["_converted_fields"]
+                if value is not None and (pd.isna(target.get(target_col)) or converted_field):
                     target[target_col] = value
+                    target["_converted_fields"].discard(target_col)
+                    if source_col_norm == "temp2m_mean_k":
+                        target["notes"].add("legacy conversion temp2m_mean_K - 273.15 to temperature_2m_C")
+                    if converted_field:
+                        target["notes"].add(f"explicit {source_col} replaced prior legacy conversion for {target_col}")
+            ndsi_col = _column_by_norm(frame.columns, "mean_ndsi_snow_cover")
+            ndsi_value = _numeric(row.get(ndsi_col)) if ndsi_col else None
+            if ndsi_value is not None:
+                if 0 <= ndsi_value <= 100 and pd.isna(target.get("snow_cover_fraction")):
+                    target["snow_cover_fraction"] = ndsi_value / 100.0
+                    target["_converted_fields"].add("snow_cover_fraction")
+                    disposition = "converted_to_snow_cover_fraction"
+                    notes = "legacy conversion mean_ndsi_snow_cover / 100 to snow_cover_fraction"
+                    target["notes"].add(notes)
+                elif 0 <= ndsi_value <= 100:
+                    disposition = "retained_sidecar_existing_snow_cover_fraction"
+                    notes = "canonical snow_cover_fraction already populated; mean_ndsi_snow_cover retained as QC sidecar"
+                else:
+                    disposition = "invalid_provider_value_not_converted"
+                    notes = "mean_ndsi_snow_cover outside 0-100 range; retained as QC sidecar"
+                unmapped_rows.append(
+                    {
+                        "snapshot_path": record["snapshot_path"],
+                        "original_relative_path": record["original_relative_path"],
+                        "inferred_product_family": record["inferred_product_family"],
+                        "unmapped_columns_json": "",
+                        "river": river,
+                        "date": date,
+                        "variable": "mean_ndsi_snow_cover",
+                        "value": ndsi_value,
+                        "unit": "percent",
+                        "canonical_field": "snow_cover_fraction",
+                        "disposition": disposition,
+                        "notes": notes,
+                    }
+                )
+            valid_pixels_col = _column_by_norm(frame.columns, "valid_modis_pixels")
+            valid_pixels = _numeric(row.get(valid_pixels_col)) if valid_pixels_col else None
+            if valid_pixels is not None:
+                unmapped_rows.append(
+                    {
+                        "snapshot_path": record["snapshot_path"],
+                        "original_relative_path": record["original_relative_path"],
+                        "inferred_product_family": record["inferred_product_family"],
+                        "unmapped_columns_json": "",
+                        "river": river,
+                        "date": date,
+                        "variable": "valid_modis_pixels",
+                        "value": valid_pixels,
+                        "unit": "pixels",
+                        "canonical_field": "",
+                        "disposition": "retained_qc_sidecar",
+                        "notes": "MODIS valid pixel count retained outside daily_hydroclimate_canonical",
+                    }
+                )
             target["snapshot_path"].add(record["snapshot_path"])
             target["original_relative_path"].add(record["original_relative_path"])
             target["sha256"].add(record["sha256"])
@@ -590,6 +700,7 @@ def promote_hydroclimate(inventory: pd.DataFrame | None = None) -> pd.DataFrame:
         temp = _numeric(item.get("temperature_2m_C"))
         if pd.isna(item.get("positive_degree_day_Cday")) and temp is not None:
             item["positive_degree_day_Cday"] = max(temp, 0.0)
+        item.pop("_converted_fields", None)
         for column in ["snapshot_path", "original_relative_path", "sha256", "notes"]:
             item[column] = ";".join(sorted(str(value) for value in item[column] if str(value)))
         rows.append(item)
@@ -619,7 +730,7 @@ def promote_hydroclimate(inventory: pd.DataFrame | None = None) -> pd.DataFrame:
 
 def promote_optical(inventory: pd.DataFrame | None = None) -> pd.DataFrame:
     inventory = inventory if inventory is not None else _load_inventory()
-    records = inventory[inventory["inferred_product_family"] == "hls"].copy()
+    records = inventory[inventory["inferred_product_family"].isin(["hls", "optical"])].copy()
     records["_priority"] = records["file_name"].map(lambda name: 2 if str(name).lower() == "hls_features.csv" else 1)
     records = records.sort_values(["_priority", "snapshot_path"])
     rows = []
@@ -637,13 +748,33 @@ def promote_optical(inventory: pd.DataFrame | None = None) -> pd.DataFrame:
             date = pd.to_datetime(row.get("date"), errors="coerce")
             if not river or pd.isna(date):
                 continue
-            collection = clean_text(row.get("collection")) or "NASA/HLS/S30_L30_legacy_mixed"
-            sensor = "HLS"
+            is_sentinel2 = record["inferred_product_family"] == "optical" or "sentinel2" in str(record["file_name"]).lower()
+            if is_sentinel2:
+                collection = clean_text(row.get("collection")) or "COPERNICUS/S2_SR_HARMONIZED_legacy_snapshot"
+                sensor = "Sentinel-2"
+                processing_level = "legacy_snapshot_sentinel2"
+                roi_set = "final_primary"
+                pixel_size = _first_numeric(row, frame.columns, ["pixel_size_m"]) or 10
+                mask_method = _first_text(row, frame.columns, ["cloud_snow_water_mask_method", "snow_ice_flag"]) or "legacy Sentinel-2 SCL cloud-snow-water method"
+                notes = f"legacy Sentinel-2 optical proxy promoted from old snapshot; source_file={record['file_name']}"
+            else:
+                collection = clean_text(row.get("collection")) or "NASA/HLS/S30_L30_legacy_mixed"
+                sensor = "HLS"
+                processing_level = "legacy_snapshot_hls"
+                roi_set = clean_text(row.get("roi_set")) or "old_project_active_or_unknown_roi"
+                pixel_size = _first_numeric(row, frame.columns, ["pixel_size_m"]) or 30
+                mask_method = _first_text(row, frame.columns, ["cloud_or_snow_mask_notes", "cloud_snow_water_mask_method"]) or "legacy HLS Fmask/water-mask method"
+                notes = f"legacy HLS optical proxy promoted from old snapshot; source_file={record['file_name']}"
             values = {}
             for source_col_norm, target_col in OPTICAL_COLUMN_MAP.items():
                 source_col = next((column for column in frame.columns if _norm(column) == source_col_norm), None)
                 if source_col and (target_col not in values or values[target_col] is None):
                     values[target_col] = _numeric(row.get(source_col))
+            n_valid = _first_numeric(row, frame.columns, ["n_valid_water_pixels", "valid_water_pixels"])
+            n_total = _first_numeric(row, frame.columns, ["n_total_pixels", "total_pixels"])
+            pct_valid = _first_numeric(row, frame.columns, ["pct_valid_water_pixels"])
+            if pct_valid is None and n_valid is not None and n_total not in {None, 0}:
+                pct_valid = 100.0 * n_valid / n_total
             rows.append(
                 {
                     "river": river,
@@ -651,43 +782,43 @@ def promote_optical(inventory: pd.DataFrame | None = None) -> pd.DataFrame:
                     "datetime": clean_text(row.get("datetime")) or date.isoformat(),
                     "sensor": sensor,
                     "collection": collection,
-                    "processing_level": "legacy_snapshot_hls",
-                    "roi_set": clean_text(row.get("roi_set")) or "old_project_active_or_unknown_roi",
-                    "pixel_size_m": 30,
+                    "processing_level": processing_level,
+                    "roi_set": roi_set,
+                    "pixel_size_m": pixel_size,
                     "blue": values.get("blue"),
                     "green": values.get("green"),
                     "red": values.get("red"),
                     "nir": values.get("nir"),
                     "swir1": values.get("swir1"),
                     "swir2": values.get("swir2"),
-                    "ndwi": _numeric(row.get("ndwi")),
-                    "mndwi": _numeric(row.get("mndwi")),
-                    "red_green_ratio": _numeric(row.get("red_green_ratio")),
-                    "green_blue_ratio": _numeric(row.get("green_blue_ratio")),
-                    "n_valid_water_pixels": _numeric(row.get("valid_water_pixels")),
-                    "n_total_pixels": pd.NA,
-                    "pct_valid_water_pixels": pd.NA,
-                    "cloud_snow_water_mask_method": clean_text(row.get("cloud_or_snow_mask_notes")) or "legacy HLS Fmask/water-mask method",
+                    "ndwi": _first_numeric(row, frame.columns, ["ndwi", "ndwi_median", "ndwi_mean"]),
+                    "mndwi": _first_numeric(row, frame.columns, ["mndwi", "mndwi_median", "mndwi_mean"]),
+                    "red_green_ratio": _first_numeric(row, frame.columns, ["red_green_ratio", "red_green_ratio_median", "red_green_ratio_mean"]),
+                    "green_blue_ratio": _first_numeric(row, frame.columns, ["green_blue_ratio", "green_blue_ratio_median", "green_blue_ratio_mean"]),
+                    "n_valid_water_pixels": n_valid,
+                    "n_total_pixels": n_total,
+                    "pct_valid_water_pixels": pct_valid,
+                    "cloud_snow_water_mask_method": mask_method,
                     "image_id": clean_text(row.get("image_id")),
                     "source_id": SOURCE_ID,
                     "quality_flag": QUALITY_OPTICAL,
                     "snapshot_path": record["snapshot_path"],
                     "original_relative_path": record["original_relative_path"],
                     "sha256": record["sha256"],
-                    "notes": f"legacy HLS optical proxy promoted from old snapshot; source_file={record['file_name']}",
+                    "notes": notes,
                 }
             )
     old_rows = ensure_columns(pd.DataFrame(rows), "optical_timeseries_canonical")
     if not old_rows.empty:
-        old_rows = old_rows.drop_duplicates(["river", "date", "datetime", "image_id", "roi_set"], keep="last")
+        old_rows = old_rows.drop_duplicates(["river", "date", "datetime", "image_id", "roi_set", "sensor"], keep="last")
     existing_path = PROCESSED_DIR / "optical_timeseries_canonical.csv"
     existing = pd.read_csv(existing_path) if existing_path.exists() else pd.DataFrame()
     if not existing.empty:
         existing = ensure_columns(existing, "optical_timeseries_canonical")
         non_old = existing[existing["source_id"].astype(str) != SOURCE_ID]
-        non_old_keys = set(zip(non_old["river"].astype(str), non_old["date"].astype(str), non_old["image_id"].astype(str), non_old["roi_set"].astype(str)))
+        non_old_keys = set(zip(non_old["river"].astype(str), non_old["date"].astype(str), non_old["image_id"].astype(str), non_old["roi_set"].astype(str), non_old["sensor"].astype(str)))
         if not old_rows.empty:
-            old_keys = list(zip(old_rows["river"].astype(str), old_rows["date"].astype(str), old_rows["image_id"].astype(str), old_rows["roi_set"].astype(str)))
+            old_keys = list(zip(old_rows["river"].astype(str), old_rows["date"].astype(str), old_rows["image_id"].astype(str), old_rows["roi_set"].astype(str), old_rows["sensor"].astype(str)))
             old_rows = old_rows[[key not in non_old_keys for key in old_keys]]
         combined = pd.concat([non_old, old_rows], ignore_index=True)
     else:

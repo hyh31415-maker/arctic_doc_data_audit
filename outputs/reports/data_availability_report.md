@@ -26,6 +26,8 @@ This report audits data acquisition and preprocessing readiness only. No DOC mod
 | gee_smap_context_optional                      | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                     |            1 |
 | hydroatlas                                     | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.           |            1 |
 | hydrobasins                                    | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.           |            1 |
+| old_arctic_doc_snowmelt_outputs                | downloaded        |                                                                                                                    |            4 |
+| old_arctic_doc_snowmelt_untrained_data         | downloaded        |                                                                                                                    |          166 |
 | partners_mdpi_eurasian_candidate               | dry_run           | Search/download supplementary tables conservatively and preserve article/source citation before parsing.           |            1 |
 | wqp_usgs_yukon_candidate                       | dry_run           | Candidate query only; results need label QC before use.                                                            |            1 |
 
@@ -53,6 +55,8 @@ This report audits data acquisition and preprocessing readiness only. No DOC mod
 | gee_smap_context_optional                      | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                     |            1 |
 | hydroatlas                                     | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.           |            1 |
 | hydrobasins                                    | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.           |            1 |
+| old_arctic_doc_snowmelt_outputs                | downloaded        |                                                                                                                    |            4 |
+| old_arctic_doc_snowmelt_untrained_data         | downloaded        |                                                                                                                    |          166 |
 | partners_mdpi_eurasian_candidate               | dry_run           | Search/download supplementary tables conservatively and preserve article/source citation before parsing.           |            1 |
 | wqp_usgs_yukon_candidate                       | dry_run           | Candidate query only; results need label QC before use.                                                            |            1 |
 

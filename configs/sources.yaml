@@ -150,6 +150,27 @@ sources:
       - outputs/tables/arcticgro_absorbance_doc_features.csv
       - outputs/tables/multiriver_run_summary.csv
 
+  - source_id: old_arctic_doc_snowmelt_untrained_data
+    source_family: old_project
+    data_role: reference-only raw/interim data snapshot
+    source_url: env:OLD_PROJECT_DIR
+    official_or_secondary: secondary
+    expected_update_frequency: none
+    version_policy: "Copy OLD_PROJECT_DIR data/raw, data/raw_external, and data/interim as an isolated local snapshot with SHA256 manifest rows."
+    raw_commit_allowed: false
+    notes: "Old untrained data files are copied for provenance/reference only. They are not treated as authoritative and are not merged into canonical tables unless regenerated/audited."
+    local_subdir: data/raw_external/old_project_snapshot
+    include_dirs:
+      - data/raw
+      - data/raw_external
+      - data/interim
+    exclude_name_patterns:
+      - "*.joblib"
+      - "*.pkl"
+      - "*model*"
+      - "*prediction*"
+      - "*flux*"
+
   - source_id: arctic_data_center_tank_2023
     source_family: Arctic Data Center
     data_role: benchmark fixed-version package
@@ -301,4 +322,3 @@ sources:
     raw_commit_allowed: false
     notes: "Basin attributes, not DOC label data."
     local_subdir: data/raw_external/hydrosheds
-

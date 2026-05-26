@@ -14,7 +14,7 @@ from .sources.datastream import download_datastream_mackenzie_candidates
 from .sources.gee_hydroclimate import gee_hydroclimate_dry_run
 from .sources.gee_optical import gee_optical_dry_run
 from .sources.hydrobasins import acquire_hydrosheds_context
-from .sources.old_project import import_old_project_reference
+from .sources.old_project import import_old_project_reference, import_old_project_untrained_data
 from .sources.partners_mdpi import acquire_partners_mdpi_candidates
 from .sources.wqp_usgs import download_wqp_yukon_candidates
 
@@ -60,6 +60,8 @@ def run_download(args: argparse.Namespace) -> None:
         download_arcticgro(dry_run=args.dry_run)
     if source in {"old_project", "old_arctic_doc_snowmelt_outputs", "all"}:
         import_old_project_reference(dry_run=args.dry_run)
+    if source in {"old_project_raw", "old_project_data", "old_arctic_doc_snowmelt_untrained_data", "all"}:
+        import_old_project_untrained_data(dry_run=args.dry_run)
     if source in {"wqp_usgs", "wqp", "wqp_usgs_yukon_candidate", "all"}:
         download_wqp_yukon_candidates(dry_run=args.dry_run)
     if source in {"datastream", "datastream_mackenzie_candidate", "all"}:

@@ -84,7 +84,15 @@ python -m arctic_doc_data_audit.cli download --source old_project
 
 Imported old files are reference-only. They are never treated as authoritative labels until regenerated from raw sources.
 
+To copy old untrained source files as an isolated local snapshot, run:
+
+```powershell
+$env:OLD_PROJECT_DIR="D:/Hao/Desktop/冰冻圈水文/北极大河DOC/arctic_doc_snowmelt"
+python -m arctic_doc_data_audit.cli download --source old_project_raw
+```
+
+This copies `data/raw`, `data/raw_external`, and `data/interim` into `data/raw_external/old_project_snapshot/`, records SHA256 rows in the manifest, and keeps the files out of git.
+
 ## Future Training Inputs
 
 Future modeling code should read `doc_labels_canonical.csv`, `daily_discharge_canonical.csv`, `daily_hydroclimate_canonical.csv`, `optical_timeseries_canonical.csv`, and `basin_context_canonical.csv`. The prepared `training_matrix_daily_predictable.csv` intentionally excludes lab absorbance/CDOM columns and is only a future input table, not a model result.
-

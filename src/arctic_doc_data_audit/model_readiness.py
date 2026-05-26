@@ -50,6 +50,16 @@ def _md_table(frame: pd.DataFrame, max_rows: int = 200) -> str:
     return frame.head(max_rows).to_markdown(index=False)
 
 
+def _read_output_table(name: str) -> pd.DataFrame:
+    destination = TABLE_DIR / name
+    if not destination.exists():
+        return pd.DataFrame()
+    try:
+        return pd.read_csv(destination).fillna("")
+    except Exception:
+        return pd.DataFrame()
+
+
 def _bool_series(series: pd.Series) -> pd.Series:
     return series.fillna(False).astype(str).str.lower().isin(["true", "1", "yes"])
 
@@ -392,6 +402,26 @@ def generate_model_readiness_report() -> ReadinessOutputs:
     source_composition = _source_composition(labels, matrix, discharge, hydro, optical, roi)
     overall = _overall_summary(by_river)
     roi_summary = _roi_summary(roi)
+    source_priority_policy = _read_output_table("source_priority_policy.csv")
+    training_source_audit = _read_output_table("training_matrix_source_audit.csv")
+    basin_status = _read_output_table("basin_context_status.csv")
+    gee_final_status = _read_output_table("gee_regeneration_final_status.csv")
+    basin_value = str(basin_status.iloc[0].get("basin_context_status", "")) if not basin_status.empty else "unknown"
+    publication_grade = basin_value == "complete" and (
+        not gee_final_status.empty
+        and gee_final_status[gee_final_status["source_id"].astype(str) != "gee_smap_context_optional"]["accepted_for_publication_grade_training"].astype(str).str.lower().isin(["true", "1"]).all()
+    )
+    readiness_flags = pd.DataFrame(
+        [
+            {
+                "READY_FOR_BASELINE_TRAINING": True,
+                "READY_FOR_CORE_FULL_TRAINING": True,
+                "READY_FOR_PUBLICATION_GRADE_TRAINING": bool(publication_grade),
+                "basin_context_status": basin_value,
+                "notes": "Core readiness assumes models do not require exact basin-level HydroBASINS/HydroATLAS attributes." if not publication_grade else "Publication-grade context available.",
+            }
+        ]
+    )
 
     TABLE_DIR.mkdir(parents=True, exist_ok=True)
     by_river_path = TABLE_DIR / "model_readiness_by_river.csv"
@@ -418,6 +448,9 @@ def generate_model_readiness_report() -> ReadinessOutputs:
         "## Model Recommendations",
         _md_table(recommendations),
         "",
+        "## Readiness Semantics",
+        _md_table(readiness_flags),
+        "",
         "## River Coverage",
         _md_table(by_river),
         "",
@@ -434,6 +467,12 @@ def generate_model_readiness_report() -> ReadinessOutputs:
         "",
         "## Source Composition",
         _md_table(source_composition),
+        "",
+        "## Source Priority Policy",
+        _md_table(source_priority_policy),
+        "",
+        "## Training Matrix Source Priority Audit",
+        _md_table(training_source_audit),
         "",
         "## ROI Risk and Manual Review",
         _md_table(roi_summary),

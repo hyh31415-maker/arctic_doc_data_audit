@@ -33,6 +33,9 @@ python -m arctic_doc_data_audit.cli gee-auth-check
 python -m arctic_doc_data_audit.cli run-gee-extraction --all
 python -m arctic_doc_data_audit.cli complete-basin-context
 python -m arctic_doc_data_audit.cli finalize-candidate-sources --defer-datastream
+python -m arctic_doc_data_audit.cli qa-data
+python -m arctic_doc_data_audit.cli fix-gee-failures --all
+python -m arctic_doc_data_audit.cli discover-wqp-characteristics
 python -m arctic_doc_data_audit.cli report
 python -m pytest
 ```
@@ -53,6 +56,9 @@ make gee-auth-check
 make run-gee-extraction
 make complete-basin-context
 make finalize-candidate-sources
+make qa-data
+make fix-gee-failures
+make discover-wqp-characteristics
 make report
 make test
 ```
@@ -166,3 +172,19 @@ python -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_YYYYMMDD
 ```
 
 Regenerated GEE rows use non-legacy source ids (`gee_hls_s30_l30`, `gee_sentinel2_sr_harmonized`, `gee_landsat_c2_l2`, `gee_era5_land`, `gee_modis_mod10a1`). Legacy snapshot rows remain auditable reference rows, while the training matrix prefers regenerated hydroclimate when both are present. DataStream can be explicitly deferred with `--defer-datastream`; MDPI supplements remain optional/manual mechanism context after HTTP 403. The freeze report still states that no model, DOC prediction, or flux product was generated.
+
+## Data QA & Freeze v3
+
+Before any training handoff, run the v3 QA flow:
+
+```powershell
+python -m arctic_doc_data_audit.cli qa-data
+python -m arctic_doc_data_audit.cli fix-gee-failures --all
+python -m arctic_doc_data_audit.cli discover-wqp-characteristics
+python -m arctic_doc_data_audit.cli finalize-candidate-sources --defer-datastream
+python -m arctic_doc_data_audit.cli rebuild-training-matrix-v3
+python -m arctic_doc_data_audit.cli model-readiness
+python -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_YYYYMMDD_v3
+```
+
+v3 uses three readiness flags: baseline, core full, and publication grade. Approximate ROI-derived basin context can support core full training when basin-level attributes are not model inputs, but it does not satisfy publication-grade readiness. Publication-grade training requires real HydroBASINS/HydroATLAS upstream basin context and documented resolution of GEE/ROI issues.

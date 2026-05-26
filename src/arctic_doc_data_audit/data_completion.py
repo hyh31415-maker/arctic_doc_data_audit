@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import unquote, urlencode
 
 import pandas as pd
 import requests
@@ -398,6 +398,109 @@ def complete_wqp_yukon() -> pd.DataFrame:
     return qc
 
 
+def discover_wqp_characteristics() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    record = source_by_id(WQP_SOURCE_ID)
+    out_dir = path(record.get("local_subdir", "data/raw_external/wqp_usgs"))
+    query_dir = out_dir / "queries"
+    bbox = load_rivers()["Yukon"]["wqp_query_hints"]["bBox"]
+    base_params = {
+        "countrycode": "US",
+        "statecode": "US:02",
+        "siteType": "Stream",
+        "bBox": bbox,
+        "mimeType": "csv",
+        "zip": "no",
+    }
+    station_path = out_dir / "yukon_sites.csv"
+    if not station_path.exists():
+        _http_get(_wqp_query_url("Station", base_params), station_path, WQP_SOURCE_ID, record["source_url"])
+    sites = _read_csv_if_exists(station_path)
+
+    broad_path = query_dir / "all_characteristics_discovery_results.csv"
+    response = _http_get(_wqp_query_url("Result", base_params), broad_path, WQP_SOURCE_ID, record["source_url"], timeout=180)
+    broad = _read_csv_if_exists(broad_path) if response is not None else _read_csv_if_exists(out_dir / "yukon_results.csv")
+    if "CharacteristicName" not in broad.columns:
+        discovery = pd.DataFrame(columns=["characteristic_name", "result_rows", "selected_for_requery", "selection_reason"])
+    else:
+        counts = broad["CharacteristicName"].fillna("").astype(str).value_counts().reset_index()
+        counts.columns = ["characteristic_name", "result_rows"]
+        keywords = r"carbon|organic|absorb|uv|color|turbid|sediment|temperature|discharge"
+        counts["selected_for_requery"] = counts["characteristic_name"].str.contains(keywords, case=False, regex=True, na=False)
+        counts["selection_reason"] = counts["selected_for_requery"].map({True: "keyword_match", False: ""})
+        discovery = counts.sort_values(["selected_for_requery", "characteristic_name"], ascending=[False, True])
+    _write_csv(discovery, TABLE_DIR / "wqp_characteristic_discovery.csv")
+
+    manifest = read_manifest()
+    failed = manifest[(manifest["source_id"].astype(str) == WQP_SOURCE_ID) & (manifest["download_status"].astype(str) == "failed")] if not manifest.empty else pd.DataFrame()
+    selected = sorted(discovery.loc[discovery["selected_for_requery"].astype(str).str.lower().isin(["true", "1"]), "characteristic_name"].dropna().astype(str).unique()) if not discovery.empty else []
+    repair_rows = []
+    for _, row in failed.iterrows():
+        original = ""
+        match = re.search(r"characteristicName=([^&]+)", str(row.get("download_url", "")))
+        if match:
+            original = unquote(match.group(1).replace("+", " "))
+        possible = [value for value in selected if original and original.lower() in value.lower()]
+        repair_rows.append(
+            {
+                "original_characteristic": original,
+                "failure_reason": row.get("failure_reason", ""),
+                "matched_discovered_characteristic": possible[0] if possible else "",
+                "repair_action": "use_discovered_characteristics" if selected else "manual_review_required",
+            }
+        )
+    plan = pd.DataFrame(repair_rows, columns=["original_characteristic", "failure_reason", "matched_discovered_characteristic", "repair_action"])
+    _write_csv(plan, TABLE_DIR / "wqp_query_repair_plan.csv")
+
+    frames = [broad] if not broad.empty else []
+    for characteristic in selected:
+        params = {**base_params, "characteristicName": characteristic}
+        destination = query_dir / f"discovered_{_safe_name(characteristic)}_results.csv"
+        response = _http_get(_wqp_query_url("Result", params), destination, WQP_SOURCE_ID, record["source_url"], timeout=120)
+        if response is None:
+            continue
+        frame = _read_csv_if_exists(destination)
+        if not frame.empty:
+            frame["_query_characteristic"] = characteristic
+            frames.append(frame)
+    results = pd.concat(frames, ignore_index=True).drop_duplicates() if frames else pd.DataFrame()
+    result_path = out_dir / "yukon_results.csv"
+    _write_csv(results, result_path)
+    append_manifest(
+        manifest_for_file(
+            source_id=WQP_SOURCE_ID,
+            source_url=record["source_url"],
+            download_url="combined:wqp_yukon_candidate_results_discovery_repaired",
+            resolved_url="combined:wqp_yukon_candidate_results_discovery_repaired",
+            local_path=result_path,
+            version_detected="live_service_query_discovery_repaired",
+            license_or_citation="Water Quality Portal / USGS candidate data.",
+        )
+    )
+    qc = build_wqp_candidate_qc(sites, results)
+    _write_csv(qc, TABLE_DIR / "wqp_usgs_candidate_label_qc.csv")
+
+    lines = [
+        "# WQP/USGS Candidate Report",
+        "",
+        f"Generated: {utc_now()}",
+        "",
+        NO_MODEL_TEXT,
+        "",
+        "## Characteristic Discovery",
+        discovery.head(200).to_markdown(index=False) if not discovery.empty else "_No discovery rows._",
+        "",
+        "## Query Repair Plan",
+        plan.to_markdown(index=False) if not plan.empty else "_No repair rows._",
+        "",
+        "## Candidate QC Summary",
+        qc.groupby(["parameter_canonical", "usability_tier"], dropna=False).size().reset_index(name="rows").to_markdown(index=False) if not qc.empty else "_No candidate rows._",
+        "",
+        "Candidate labels are not promoted to `doc_labels_canonical` by this command.",
+    ]
+    (REPORT_DIR / "wqp_usgs_candidate_report.md").write_text("\n".join(lines), encoding="utf-8")
+    return discovery, plan, qc
+
+
 def build_wqp_candidate_qc(sites: pd.DataFrame, results: pd.DataFrame) -> pd.DataFrame:
     target = load_rivers()["Yukon"]
     target_lat = float(target["approximate_station_latitude"])
@@ -701,9 +804,9 @@ def complete_basin_context() -> pd.DataFrame:
         quality = "basin_context_approximate_needs_review"
         notes = "HydroBASINS local file configured; parser records approximate context pending exact upstream delineation QA."
     else:
-        status = "basin_context_approximate_needs_review"
+        status = "approximate_roi_context"
         quality = "basin_context_approximate_needs_review"
-        notes = "No HydroBASINS/HydroATLAS local files configured. Using final_primary ROI-derived approximate lower-river context; accepted for full-data v2 as review-required context, not exact upstream basin."
+        notes = "No HydroBASINS/HydroATLAS local files configured. Using final_primary ROI-derived approximate lower-river context; accepted for core full training only when basin-level attributes are not model inputs, not publication-grade upstream basin context."
     roi = read_table_if_exists("roi_catalog")
     for river in load_rivers():
         river_roi = roi[(roi["river"].astype(str) == river) & (roi["roi_set"].astype(str) == "final_primary")] if not roi.empty else pd.DataFrame()
@@ -737,6 +840,8 @@ def complete_basin_context() -> pd.DataFrame:
                 "hydroatlas_local_path": hydroatlas_path,
                 "quality_flag": quality,
                 "accepted_for_full_training_readiness": True,
+                "accepted_for_core_full_training_readiness": True,
+                "accepted_for_publication_grade_training": False,
                 "notes": notes,
             }
         ]
@@ -788,13 +893,26 @@ def finalize_candidate_sources(defer_datastream: bool = False) -> pd.DataFrame:
     rows.append(
         {
             "source_id": ADC_SOURCE_ID,
-            "final_status": "doi_landing_page_indexed_benchmark_not_blocking",
+            "final_status": "benchmark_inventory_only_not_blocking",
             "blocks_full_training": False,
             "notes": "Arctic Data Center package remains benchmark/validation until manually audited.",
         }
     )
     frame = pd.DataFrame(rows)
     _write_csv(frame, TABLE_DIR / "candidate_source_final_status.csv")
+    lines = [
+        "# Candidate Source Finalization Report",
+        "",
+        f"Generated: {utc_now()}",
+        "",
+        NO_MODEL_TEXT,
+        "",
+        "## Final Status",
+        frame.to_markdown(index=False),
+        "",
+        "External candidate labels are not promoted by default. DataStream is explicitly deferred by user choice; MDPI/PARTNERS is optional/manual after HTTP 403; Arctic Data Center is benchmark inventory only.",
+    ]
+    (REPORT_DIR / "candidate_source_finalization_report.md").write_text("\n".join(lines), encoding="utf-8")
     return frame
 
 
@@ -1055,6 +1173,11 @@ def _gee_regeneration_status() -> dict[str, Any]:
 def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
     ensure_project_dirs()
     generate_model_readiness_report()
+    from .data_qa import generate_data_qa_report, gee_regeneration_final_status, source_priority_audit
+
+    source_priority_audit()
+    gee_final_status = gee_regeneration_final_status()
+    generate_data_qa_report()
     canonical_hashes = _canonical_hashes()
     manifest = read_manifest()
     freeze_manifest = manifest.copy()
@@ -1070,15 +1193,21 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
     if basin_status.empty:
         basin_status = _read_csv_if_exists(TABLE_DIR / "hydrobasins_hydroatlas_acquisition_status.csv")
     basin_context_status = "unknown"
-    basin_context_accepted = False
+    basin_context_core_accepted = False
+    basin_context_publication_accepted = False
     if not basin_status.empty:
         if "basin_context_status" in basin_status.columns:
             basin_context_status = str(basin_status["basin_context_status"].iloc[0])
         elif "overall_basin_context_status" in basin_status.columns:
             basin_context_status = str(basin_status["overall_basin_context_status"].iloc[0])
-        basin_context_accepted = basin_context_status in {"complete", "basin_context_approximate_needs_review"}
+        basin_context_core_accepted = basin_context_status in {"complete", "basin_context_approximate_needs_review", "approximate_roi_context"}
+        basin_context_publication_accepted = basin_context_status == "complete"
         if "accepted_for_full_training_readiness" in basin_status.columns:
-            basin_context_accepted = basin_status["accepted_for_full_training_readiness"].astype(str).str.lower().isin(["true", "1"]).any()
+            basin_context_core_accepted = basin_status["accepted_for_full_training_readiness"].astype(str).str.lower().isin(["true", "1"]).any()
+        if "accepted_for_core_full_training_readiness" in basin_status.columns:
+            basin_context_core_accepted = basin_status["accepted_for_core_full_training_readiness"].astype(str).str.lower().isin(["true", "1"]).any()
+        if "accepted_for_publication_grade_training" in basin_status.columns:
+            basin_context_publication_accepted = basin_status["accepted_for_publication_grade_training"].astype(str).str.lower().isin(["true", "1"]).any()
     candidate_final = _read_csv_if_exists(TABLE_DIR / "candidate_source_final_status.csv")
     datastream_ok = not candidate_final.empty and (
         candidate_final[
@@ -1102,7 +1231,13 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
         > 0
     )
     gee_status = _gee_regeneration_status()
-    gee_completed_or_accepted = bool(gee_status.get("accepted_for_full_training", False))
+    if not gee_final_status.empty:
+        required_gee = gee_final_status[gee_final_status["source_id"].astype(str) != "gee_smap_context_optional"]
+        gee_completed_or_accepted = required_gee["accepted_for_core_full_training"].astype(str).str.lower().isin(["true", "1"]).all()
+        gee_publication_accepted = required_gee["accepted_for_publication_grade_training"].astype(str).str.lower().isin(["true", "1"]).all()
+    else:
+        gee_completed_or_accepted = bool(gee_status.get("accepted_for_full_training", False))
+        gee_publication_accepted = False
     tests_passed = False
     test_output = "Tests were not run inside freeze-data."
     if run_tests:
@@ -1125,36 +1260,47 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
             test_output = "Inferred from existing test_report.md."
 
     row_counts = {row["table_name"]: int(row["row_count"]) if str(row["row_count"]).isdigit() else row["row_count"] for _, row in canonical_hashes.iterrows()}
-    blockers = []
+    core_blockers = []
+    publication_blockers = []
     if not gee_plan_exists:
-        blockers.append("GEE extraction readiness plan missing.")
+        core_blockers.append("GEE extraction readiness plan missing.")
     if not candidate_audit_exists:
-        blockers.append("Candidate label audit missing.")
-    if not basin_context_accepted:
-        blockers.append(f"Basin context status is {basin_context_status}.")
+        core_blockers.append("Candidate label audit missing.")
+    if not basin_context_core_accepted:
+        core_blockers.append(f"Basin context status is {basin_context_status}.")
+    if not basin_context_publication_accepted:
+        publication_blockers.append(f"Basin context status is {basin_context_status}, not real HydroBASINS/HydroATLAS upstream context.")
     if not gee_completed_or_accepted:
-        blockers.append("GEE regeneration is incomplete or not accepted.")
+        core_blockers.append("GEE regeneration is incomplete or not accepted for core full training.")
+    if not gee_publication_accepted:
+        publication_blockers.append("GEE regeneration is not fully accepted for publication-grade training.")
     if not datastream_ok:
-        blockers.append("DataStream source is not complete or explicitly deferred.")
+        core_blockers.append("DataStream source is not complete or explicitly deferred.")
     if not mdpi_ok:
-        blockers.append("MDPI source is not complete or optional/manual.")
+        core_blockers.append("MDPI source is not complete or optional/manual.")
     if not wqp_ok:
-        blockers.append("WQP candidate audit/final status is incomplete.")
+        core_blockers.append("WQP candidate audit/final status is incomplete.")
     if not tests_passed:
-        blockers.append("Tests have not passed for this freeze.")
+        core_blockers.append("Tests have not passed for this freeze.")
 
     baseline_ready = (
         row_counts.get("doc_labels_canonical", 0)
         and row_counts.get("daily_discharge_canonical", 0)
+        and row_counts.get("training_matrix_daily_predictable", 0)
         and row_counts.get("daily_hydroclimate_canonical", 0)
         and model_report_exists
         and tests_passed
     )
-    full_ready = baseline_ready and candidate_audit_exists and gee_plan_exists and gee_completed_or_accepted and basin_context_accepted and datastream_ok and mdpi_ok and wqp_ok and not blockers
+    core_full_ready = baseline_ready and candidate_audit_exists and gee_plan_exists and gee_completed_or_accepted and basin_context_core_accepted and datastream_ok and mdpi_ok and wqp_ok and not core_blockers
+    publication_ready = bool(core_full_ready and basin_context_publication_accepted and gee_publication_accepted and not publication_blockers)
     readiness_statement = (
-        "Frozen data are ready for full-training data handoff under the documented v2 rules. No model has been trained by this repository."
-        if full_ready
-        else "Frozen data are ready for baseline training only if the readiness flag above is true. Full training must wait until all candidate source, basin, and GEE regeneration blockers are resolved."
+        "Frozen data are ready for core full-training data handoff under the documented v3 rules, but not publication-grade training because exact upstream HydroBASINS/HydroATLAS context is not complete. No model has been trained by this repository."
+        if core_full_ready and not publication_ready
+        else (
+            "Frozen data are ready for publication-grade training data handoff under the documented v3 rules. No model has been trained by this repository."
+            if publication_ready
+            else "Frozen data are ready for baseline training only if the readiness flag above is true. Core/full training must wait until critical candidate source, basin, or GEE blockers are resolved."
+        )
     )
     lines = [
         "# Data Freeze Report",
@@ -1167,8 +1313,10 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
         "",
         "## Freeze Readiness",
         f"- READY_FOR_BASELINE_TRAINING: `{bool(baseline_ready)}`",
-        f"- READY_FOR_FULL_TRAINING: `{bool(full_ready)}`",
-        f"- frozen_data_training_status: `{'ready_for_baseline_not_full' if baseline_ready and not full_ready else ('ready_for_full_training' if full_ready else 'not_ready')}`",
+        f"- READY_FOR_CORE_FULL_TRAINING: `{bool(core_full_ready)}`",
+        f"- READY_FOR_PUBLICATION_GRADE_TRAINING: `{bool(publication_ready)}`",
+        f"- READY_FOR_FULL_TRAINING: `{bool(core_full_ready)}`",
+        f"- frozen_data_training_status: `{'ready_for_core_full_not_publication_grade' if core_full_ready and not publication_ready else ('ready_for_publication_grade_training' if publication_ready else ('ready_for_baseline_not_core_full' if baseline_ready else 'not_ready'))}`",
         "",
         "## Source Status Summary",
         source_status.to_markdown(index=False) if not source_status.empty else "_No manifest rows._",
@@ -1180,12 +1328,17 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
         f"- candidate_label_audit_completed: `{candidate_audit_exists}`",
         f"- gee_extraction_readiness_completed: `{gee_plan_exists}`",
         f"- basin_context_status: `{basin_context_status}`",
-        f"- basin_context_accepted_for_full_training: `{basin_context_accepted}`",
+        f"- basin_context_accepted_for_core_full_training: `{basin_context_core_accepted}`",
+        f"- basin_context_accepted_for_publication_grade_training: `{basin_context_publication_accepted}`",
         f"- datastream_final_status_ok: `{datastream_ok}`",
         f"- mdpi_final_status_ok: `{mdpi_ok}`",
         f"- wqp_final_status_ok: `{wqp_ok}`",
         f"- gee_regeneration_status: `{gee_status.get('status', 'unknown')}`",
-        f"- gee_regeneration_accepted_for_full_training: `{gee_completed_or_accepted}`",
+        f"- gee_regeneration_accepted_for_core_full_training: `{gee_completed_or_accepted}`",
+        f"- gee_regeneration_accepted_for_publication_grade_training: `{gee_publication_accepted}`",
+        "",
+        "## GEE Regeneration Final Status",
+        gee_final_status.to_markdown(index=False) if not gee_final_status.empty else "_No final GEE status rows._",
         "",
         "## Model Readiness Summary",
         "- See `outputs/reports/model_readiness_report.md`.",
@@ -1195,8 +1348,11 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
         f"- tests_passed: `{tests_passed}`",
         f"- test_summary: `{test_output.splitlines()[-1] if test_output else ''}`",
         "",
-        "## Unresolved Blockers",
-        "\n".join(f"- {item}" for item in blockers) if blockers else "_No critical blockers._",
+        "## Unresolved Core Blockers",
+        "\n".join(f"- {item}" for item in core_blockers) if core_blockers else "_No critical core blockers._",
+        "",
+        "## Unresolved Publication-Grade Blockers",
+        "\n".join(f"- {item}" for item in publication_blockers) if publication_blockers else "_No publication-grade blockers._",
         "",
         "## Explicit Statement",
         readiness_statement,

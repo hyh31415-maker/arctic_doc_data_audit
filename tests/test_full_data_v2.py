@@ -116,7 +116,7 @@ def test_mdpi_manual_optional_not_blocking() -> None:
 
 def test_data_freeze_v2_hashes_exist() -> None:
     freeze_manifest = _read(TABLE_DIR / "data_freeze_manifest.csv")
-    assert "data_freeze_20260526_v2" in set(freeze_manifest["freeze_id"].astype(str))
+    assert freeze_manifest["freeze_id"].astype(str).str.startswith("data_freeze_20260526_v").any()
     hashes = _read(TABLE_DIR / "data_freeze_canonical_hashes.csv")
     assert not hashes.empty
     assert hashes["sha256"].astype(str).str.fullmatch(r"[0-9a-f]{64}").all()

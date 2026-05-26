@@ -22,6 +22,45 @@ OPTICAL_SCHEMA = "optical_timeseries_canonical"
 HYDRO_SCHEMA = "daily_hydroclimate_canonical"
 AUX_SCHEMA = "auxiliary_context_canonical"
 
+HLS_BAND_CANDIDATES = {
+    "blue": ["B2", "B02", "blue"],
+    "green": ["B3", "B03", "green"],
+    "red": ["B4", "B04", "red"],
+    "nir": ["B5", "B8", "B8A", "B05", "nir"],
+    "swir1": ["B6", "B11", "B06", "swir1"],
+    "swir2": ["B7", "B12", "B07", "swir2"],
+}
+
+
+def resolve_band(available_bands: list[str], canonical_name: str, candidate_band_names: list[str]) -> str:
+    """Resolve one canonical band name against available GEE band names."""
+    available = {str(band).lower(): str(band) for band in available_bands}
+    for candidate in candidate_band_names:
+        match = available.get(str(candidate).lower())
+        if match:
+            return match
+    return ""
+
+
+def resolve_band_map(available_bands: list[str], candidate_map: dict[str, list[str]]) -> tuple[dict[str, str], list[str]]:
+    resolved: dict[str, str] = {}
+    missing: list[str] = []
+    for canonical_name, candidates in candidate_map.items():
+        band = resolve_band(available_bands, canonical_name, candidates)
+        if band:
+            resolved[band] = canonical_name
+        else:
+            missing.append(canonical_name)
+    return resolved, missing
+
+
+def safe_pct_valid(valid_pixels: Any, total_pixels: Any) -> float | None:
+    valid = pd.to_numeric(pd.Series([valid_pixels]), errors="coerce").iloc[0]
+    total = pd.to_numeric(pd.Series([total_pixels]), errors="coerce").iloc[0]
+    if pd.isna(valid) or pd.isna(total) or float(total) == 0:
+        return None
+    return float(valid) / float(total)
+
 
 @dataclass(frozen=True)
 class GeeInit:
@@ -189,7 +228,7 @@ def _constant_total_count(ee: Any, geom: Any, scale: int) -> Any:
     ).get("total")
 
 
-def _optical_feature(ee: Any, image: Any, geom: Any, scale: int, source_id: str, sensor: str, collection_id: str, band_map: dict[str, str], qa_kind: str, roi_set: str, river: str) -> Any:
+def _optical_feature(ee: Any, image: Any, geom: Any, scale: int, source_id: str, sensor: str, collection_id: str, band_map: dict[str, str], qa_kind: str, roi_set: str, river: str, available_bands: list[str] | None = None, missing_bands: list[str] | None = None) -> Any:
     src = list(band_map)
     dst = [band_map[key] for key in src]
     optical = image.select(src, dst)
@@ -257,8 +296,12 @@ def _optical_feature(ee: Any, image: Any, geom: Any, scale: int, source_id: str,
             "original_relative_path": "",
             "sha256": "",
             "notes": f"Regenerated from Earth Engine collection {collection_id}; ROI set {roi_set}.",
+            "available_bands_json": json.dumps(available_bands or []),
+            "missing_canonical_bands_json": json.dumps(missing_bands or []),
         }
     )
+    for source_band, canonical_name in band_map.items():
+        props = props.set(f"canonical_{canonical_name}_source", source_band)
     return ee.Feature(
         None,
         ee.Dictionary(stats).combine(props, overwrite=True),
@@ -270,7 +313,12 @@ def _clean_optical_rows(rows: list[dict[str, Any]], source_id: str) -> pd.DataFr
     for row in rows:
         valid = pd.to_numeric(pd.Series([row.get("n_valid_water_pixels")]), errors="coerce").iloc[0]
         total = pd.to_numeric(pd.Series([row.get("n_total_pixels")]), errors="coerce").iloc[0]
-        pct = 100.0 * valid / total if pd.notna(valid) and pd.notna(total) and total else pd.NA
+        pct_raw = safe_pct_valid(valid, total)
+        pct = 100.0 * pct_raw if pct_raw is not None else pd.NA
+        missing_fields = []
+        for field in ["blue", "green", "red", "nir", "swir1", "swir2"]:
+            if row.get(f"{field}_median") in [None, ""]:
+                missing_fields.append(field)
         out.append(
             {
                 "river": row.get("river", ""),
@@ -301,7 +349,14 @@ def _clean_optical_rows(rows: list[dict[str, Any]], source_id: str) -> pd.DataFr
                 "snapshot_path": "",
                 "original_relative_path": "",
                 "sha256": "",
-                "notes": row.get("notes", ""),
+                "notes": "; ".join(
+                    part
+                    for part in [
+                        row.get("notes", ""),
+                        f"missing_band_fields={json.dumps(missing_fields)}" if missing_fields else "",
+                    ]
+                    if part
+                ),
             }
         )
     frame = ensure_columns(pd.DataFrame(out), OPTICAL_SCHEMA)
@@ -347,8 +402,29 @@ def extract_optical_source(source: str, rivers: str, years: str, roi_set: str) -
                         .filterBounds(geom)
                         .filterDate(f"{year}-01-01", f"{year + 1}-01-01")
                     )
+                    first = collection.first()
+                    available_bands = first.bandNames().getInfo() if collection.size().getInfo() else []
+                    band_map = spec["band_map"]
+                    missing_bands: list[str] = []
+                    if "band_candidates" in spec:
+                        band_map, missing_bands = resolve_band_map(available_bands, spec["band_candidates"])
+                    required = set(spec.get("required_bands", ["blue", "green", "red", "nir", "swir1"]))
+                    missing_required = sorted(required.intersection(missing_bands))
+                    if missing_required:
+                        summary_rows.append(
+                            {
+                                "source_id": spec["source_id"],
+                                "river": river,
+                                "year": year,
+                                "collection": spec["collection"],
+                                "rows": 0,
+                                "status": "missing_core_bands_noncritical",
+                                "failure_reason": f"Missing canonical bands {missing_required}; available_bands={available_bands}",
+                            }
+                        )
+                        continue
                     feature_collection = collection.map(
-                        lambda image, spec=spec: _optical_feature(
+                        lambda image, spec=spec, resolved_band_map=band_map, resolved_available_bands=available_bands, resolved_missing_bands=missing_bands: _optical_feature(
                             ee,
                             image,
                             geom,
@@ -356,10 +432,12 @@ def extract_optical_source(source: str, rivers: str, years: str, roi_set: str) -
                             spec["source_id"],
                             spec["sensor"],
                             spec["collection"],
-                            spec["band_map"],
+                            resolved_band_map,
                             spec["qa_kind"],
                             roi_set,
                             river,
+                            resolved_available_bands,
+                            resolved_missing_bands,
                         )
                     )
                     rows = _feature_collection_rows(feature_collection)
@@ -390,6 +468,7 @@ def _optical_specs(source: str) -> list[dict[str, Any]]:
                 "scale": 30,
                 "qa_kind": "hls",
                 "band_map": {"B2": "blue", "B3": "green", "B4": "red", "B8A": "nir", "B11": "swir1", "B12": "swir2"},
+                "band_candidates": {**HLS_BAND_CANDIDATES, "nir": ["B8A", "B8", "B5", "B05", "nir"], "swir1": ["B11", "B6", "B06", "swir1"], "swir2": ["B12", "B7", "B07", "swir2"]},
             },
             {
                 "source_id": "gee_hls_s30_l30",
@@ -398,6 +477,7 @@ def _optical_specs(source: str) -> list[dict[str, Any]]:
                 "scale": 30,
                 "qa_kind": "hls",
                 "band_map": {"B2": "blue", "B3": "green", "B4": "red", "B5": "nir", "B6": "swir1", "B7": "swir2"},
+                "band_candidates": HLS_BAND_CANDIDATES,
             },
         ]
     if source == "sentinel2":
@@ -564,7 +644,17 @@ def _modis_feature(ee: Any, image: Any, geom: Any, river: str, roi_set: str) -> 
     snow_masked = snow.updateMask(valid)
     mean = snow_masked.reduceRegion(ee.Reducer.mean(), geom, 500, maxPixels=1e9, bestEffort=True).get("NDSI_Snow_Cover")
     count = snow_masked.reduceRegion(ee.Reducer.count(), geom, 500, maxPixels=1e9, bestEffort=True).get("NDSI_Snow_Cover")
-    fraction = ee.Algorithms.If(mean, ee.Number(mean).divide(100), None)
+    total_count = _constant_total_count(ee, geom, 500)
+    fraction = ee.Algorithms.If(ee.Algorithms.IsEqual(mean, None), None, ee.Number(mean).divide(100))
+    pct_valid = ee.Algorithms.If(
+        ee.Algorithms.IsEqual(total_count, None),
+        None,
+        ee.Algorithms.If(
+            ee.Number(total_count).eq(0),
+            None,
+            ee.Algorithms.If(ee.Algorithms.IsEqual(count, None), None, ee.Number(count).divide(total_count)),
+        ),
+    )
     return ee.Feature(
         None,
         {
@@ -572,6 +662,8 @@ def _modis_feature(ee: Any, image: Any, geom: Any, river: str, roi_set: str) -> 
             "date": date.format("YYYY-MM-dd"),
             "mean_ndsi_snow_cover": mean,
             "valid_modis_pixels": count,
+            "total_modis_pixels": total_count,
+            "pct_valid_modis_pixels": pct_valid,
             "snow_cover_fraction": fraction,
             "source_id": "gee_modis_mod10a1",
             "quality_flag": REGENERATED_QUALITY,

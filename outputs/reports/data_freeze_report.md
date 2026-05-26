@@ -1,15 +1,17 @@
 # Data Freeze Report
 
-freeze_id: `data_freeze_20260526_v2`
-generated_at: `2026-05-26T08:08:36Z`
-git_commit: `1ad50e32f3341b0785786457af0b2b580a1904e3`
+freeze_id: `data_freeze_20260526_v3`
+generated_at: `2026-05-26T10:14:38Z`
+git_commit: `40dab6e154b3ca3f58ab1e60a8570317f8a5d7ce`
 
 No DOC model was trained. No DOC prediction or flux product was generated.
 
 ## Freeze Readiness
 - READY_FOR_BASELINE_TRAINING: `True`
+- READY_FOR_CORE_FULL_TRAINING: `True`
+- READY_FOR_PUBLICATION_GRADE_TRAINING: `False`
 - READY_FOR_FULL_TRAINING: `True`
-- frozen_data_training_status: `ready_for_full_training`
+- frozen_data_training_status: `ready_for_core_full_not_publication_grade`
 
 ## Source Status Summary
 | source_id                                      | download_status   |   records |
@@ -50,7 +52,7 @@ No DOC model was trained. No DOC prediction or flux product was generated.
 | old_arctic_doc_snowmelt_untrained_data         | downloaded        |       166 |
 | partners_mdpi_eurasian_candidate               | dry_run           |         1 |
 | partners_mdpi_eurasian_candidate               | failed            |         2 |
-| wqp_usgs_yukon_candidate                       | downloaded        |         6 |
+| wqp_usgs_yukon_candidate                       | downloaded        |        32 |
 | wqp_usgs_yukon_candidate                       | dry_run           |         1 |
 | wqp_usgs_yukon_candidate                       | failed            |         8 |
 
@@ -58,7 +60,7 @@ No DOC model was trained. No DOC prediction or flux product was generated.
 | table_name                        | local_path                                           |   row_count | sha256                                                           |
 |:----------------------------------|:-----------------------------------------------------|------------:|:-----------------------------------------------------------------|
 | auxiliary_context_canonical       | data/processed/auxiliary_context_canonical.csv       |       86324 | 83141d2dded2b002f133ed95b65b6b14680e90ae4b6a2fa33dc2c0d821561f7b |
-| basin_context_canonical           | data/processed/basin_context_canonical.csv           |           6 | 4116fd1113eaf32ef6d8561831d42c8128524279cfb19e036d0fb85e25b1c6f3 |
+| basin_context_canonical           | data/processed/basin_context_canonical.csv           |           6 | 09846730071dc93652902d98f7c56dd858dd99313730c9a1ad5002d6ea31b8b2 |
 | daily_discharge_canonical         | data/processed/daily_discharge_canonical.csv         |      154370 | 7dfa107c52f636dcb6d28d38d107b5d0b4226d471554103cf5b9e893a2965cdb |
 | daily_hydroclimate_canonical      | data/processed/daily_hydroclimate_canonical.csv      |      138432 | e01c47c23dbc9ae600ee441c13294ed702e89a7b263556779e68a33ba597c1a4 |
 | doc_labels_canonical              | data/processed/doc_labels_canonical.csv              |         595 | ece38cb8238b21223b72d903da19dc5a01553b32ad50f6ace9a9c56166497657 |
@@ -71,13 +73,55 @@ No DOC model was trained. No DOC prediction or flux product was generated.
 ## Candidate Source Completion
 - candidate_label_audit_completed: `True`
 - gee_extraction_readiness_completed: `True`
-- basin_context_status: `basin_context_approximate_needs_review`
-- basin_context_accepted_for_full_training: `True`
+- basin_context_status: `approximate_roi_context`
+- basin_context_accepted_for_core_full_training: `True`
+- basin_context_accepted_for_publication_grade_training: `False`
 - datastream_final_status_ok: `True`
 - mdpi_final_status_ok: `True`
 - wqp_final_status_ok: `True`
 - gee_regeneration_status: `completed`
-- gee_regeneration_accepted_for_full_training: `True`
+- gee_regeneration_accepted_for_core_full_training: `True`
+- gee_regeneration_accepted_for_publication_grade_training: `True`
+
+## GEE Regeneration Final Status
+| source_id                   | river     | expected_years   |   successful_chunks |   failed_chunks | remaining_failure_reason_summary   | accepted_for_core_full_training   | accepted_for_publication_grade_training   | notes                                                                         |
+|:----------------------------|:----------|:-----------------|--------------------:|----------------:|:-----------------------------------|:----------------------------------|:------------------------------------------|:------------------------------------------------------------------------------|
+| gee_hls_s30_l30             | Ob        | 2016-2025        |                  10 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_hls_s30_l30             | Yenisey   | 2016-2025        |                  10 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_hls_s30_l30             | Lena      | 2016-2025        |                  10 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_hls_s30_l30             | Kolyma    | 2016-2025        |                  10 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_hls_s30_l30             | Yukon     | 2016-2025        |                  10 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_hls_s30_l30             | Mackenzie | 2016-2025        |                  10 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_sentinel2_sr_harmonized | Ob        | 2017-2025        |                   9 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_sentinel2_sr_harmonized | Yenisey   | 2017-2025        |                   9 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_sentinel2_sr_harmonized | Lena      | 2017-2025        |                   9 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_sentinel2_sr_harmonized | Kolyma    | 2017-2025        |                   9 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_sentinel2_sr_harmonized | Yukon     | 2017-2025        |                   9 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_sentinel2_sr_harmonized | Mackenzie | 2017-2025        |                   9 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_landsat_c2_l2           | Ob        | 2003-2025        |                  23 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_landsat_c2_l2           | Yenisey   | 2003-2025        |                  23 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_landsat_c2_l2           | Lena      | 2003-2025        |                  23 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_landsat_c2_l2           | Kolyma    | 2003-2025        |                  23 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_landsat_c2_l2           | Yukon     | 2003-2025        |                  23 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_landsat_c2_l2           | Mackenzie | 2003-2025        |                  23 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_era5_land               | Ob        | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_era5_land               | Yenisey   | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_era5_land               | Lena      | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_era5_land               | Kolyma    | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_era5_land               | Yukon     | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_era5_land               | Mackenzie | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_modis_mod10a1           | Ob        | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_modis_mod10a1           | Yenisey   | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_modis_mod10a1           | Lena      | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_modis_mod10a1           | Kolyma    | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_modis_mod10a1           | Yukon     | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_modis_mod10a1           | Mackenzie | 2000-2025        |                  26 |               0 |                                    | True                              | True                                      | Regenerated rows present and current extraction summary has no failed chunks. |
+| gee_smap_context_optional   | Ob        | 2015-2025        |                   0 |               0 |                                    | True                              | False                                     | SMAP is optional and deferred/failed_optional; not a core blocker.            |
+| gee_smap_context_optional   | Yenisey   | 2015-2025        |                   0 |               0 |                                    | True                              | False                                     | SMAP is optional and deferred/failed_optional; not a core blocker.            |
+| gee_smap_context_optional   | Lena      | 2015-2025        |                   0 |               0 |                                    | True                              | False                                     | SMAP is optional and deferred/failed_optional; not a core blocker.            |
+| gee_smap_context_optional   | Kolyma    | 2015-2025        |                   0 |               0 |                                    | True                              | False                                     | SMAP is optional and deferred/failed_optional; not a core blocker.            |
+| gee_smap_context_optional   | Yukon     | 2015-2025        |                   0 |               0 |                                    | True                              | False                                     | SMAP is optional and deferred/failed_optional; not a core blocker.            |
+| gee_smap_context_optional   | Mackenzie | 2015-2025        |                   0 |               0 |                                    | True                              | False                                     | SMAP is optional and deferred/failed_optional; not a core blocker.            |
 
 ## Model Readiness Summary
 - See `outputs/reports/model_readiness_report.md`.
@@ -85,10 +129,13 @@ No DOC model was trained. No DOC prediction or flux product was generated.
 
 ## Test Status
 - tests_passed: `True`
-- test_summary: `46 passed, 17 warnings in 39.87s`
+- test_summary: `57 passed, 19 warnings in 46.74s`
 
-## Unresolved Blockers
-_No critical blockers._
+## Unresolved Core Blockers
+_No critical core blockers._
+
+## Unresolved Publication-Grade Blockers
+- Basin context status is approximate_roi_context, not real HydroBASINS/HydroATLAS upstream context.
 
 ## Explicit Statement
-Frozen data are ready for full-training data handoff under the documented v2 rules. No model has been trained by this repository.
+Frozen data are ready for core full-training data handoff under the documented v3 rules, but not publication-grade training because exact upstream HydroBASINS/HydroATLAS context is not complete. No model has been trained by this repository.

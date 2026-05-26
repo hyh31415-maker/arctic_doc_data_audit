@@ -79,6 +79,24 @@ def freeze_data(args: argparse.Namespace) -> None:
     run_freeze(args.freeze_id, run_tests=True)
 
 
+def qa_data() -> None:
+    from .data_qa import qa_data as run_qa
+
+    run_qa()
+
+
+def fix_gee_failures(args: argparse.Namespace) -> None:
+    from .data_qa import fix_gee_failures as run_fix
+
+    run_fix(all_sources=args.all)
+
+
+def discover_wqp_characteristics() -> None:
+    from .data_completion import discover_wqp_characteristics as run_discovery
+
+    run_discovery()
+
+
 def gee_auth_check() -> None:
     from .gee_regeneration import gee_auth_check as run_check
 
@@ -175,6 +193,11 @@ def build_parser() -> argparse.ArgumentParser:
     candidate_audit.add_argument("--promote-approved", action="store_true", help="Promote only explicitly approved candidates; default is no promotion.")
     freeze = subparsers.add_parser("freeze-data", help="Create data freeze reports and hashes without training a model.")
     freeze.add_argument("--freeze-id", required=True, help="Freeze identifier, e.g. data_freeze_YYYYMMDD_v1.")
+    subparsers.add_parser("qa-data", help="Run data QA audits and source-priority checks without model training.")
+    fix_gee = subparsers.add_parser("fix-gee-failures", help="Fix or supersede current GEE failures without model training.")
+    fix_gee.add_argument("--all", action="store_true", help="Audit and fix all GEE sources.")
+    subparsers.add_parser("discover-wqp-characteristics", help="Discover actual WQP CharacteristicName values and rebuild candidate QC.")
+    subparsers.add_parser("rebuild-training-matrix-v3", help="Rebuild training matrix and v3 source-audit sidecars without model training.")
     subparsers.add_parser("gee-auth-check", help="Check Earth Engine authentication without printing credentials.")
     gee = subparsers.add_parser("run-gee-extraction", help="Run regenerated GEE extraction without model training.")
     gee.add_argument("--all", action="store_true", help="Run all configured GEE regenerated extraction sources.")
@@ -230,6 +253,22 @@ def main(argv: Iterable[str] | None = None) -> None:
     elif args.command == "freeze-data":
         freeze_data(args)
         logger.info("Data freeze report generated without model training.")
+    elif args.command == "qa-data":
+        qa_data()
+        logger.info("Data QA report generated without model training.")
+    elif args.command == "fix-gee-failures":
+        fix_gee_failures(args)
+        build_training_matrix()
+        model_readiness()
+        logger.info("GEE failure QA/fix step completed without model training.")
+    elif args.command == "discover-wqp-characteristics":
+        discover_wqp_characteristics()
+        generate_reports()
+        logger.info("WQP characteristic discovery completed without candidate promotion or model training.")
+    elif args.command == "rebuild-training-matrix-v3":
+        build_training_matrix()
+        model_readiness()
+        logger.info("Training matrix v3 rebuilt without model training.")
     elif args.command == "gee-auth-check":
         gee_auth_check()
         logger.info("GEE auth check completed without model training.")

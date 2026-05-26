@@ -407,7 +407,11 @@ def generate_model_readiness_report() -> ReadinessOutputs:
     basin_status = _read_output_table("basin_context_status.csv")
     gee_final_status = _read_output_table("gee_regeneration_final_status.csv")
     basin_value = str(basin_status.iloc[0].get("basin_context_status", "")) if not basin_status.empty else "unknown"
-    publication_grade = basin_value == "complete" and (
+    if not basin_status.empty and "accepted_for_publication_grade_training" in basin_status.columns:
+        basin_publication_ready = basin_status["accepted_for_publication_grade_training"].astype(str).str.lower().isin(["true", "1"]).any()
+    else:
+        basin_publication_ready = basin_value in {"complete", "upstream_basin_complete_with_hydroatlas", "upstream_basin_complete_attributes_partial"}
+    publication_grade = basin_publication_ready and (
         not gee_final_status.empty
         and gee_final_status[gee_final_status["source_id"].astype(str) != "gee_smap_context_optional"]["accepted_for_publication_grade_training"].astype(str).str.lower().isin(["true", "1"]).all()
     )

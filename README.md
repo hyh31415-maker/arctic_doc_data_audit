@@ -188,3 +188,21 @@ python -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_YYYYMMDD
 ```
 
 v3 uses three readiness flags: baseline, core full, and publication grade. Approximate ROI-derived basin context can support core full training when basin-level attributes are not model inputs, but it does not satisfy publication-grade readiness. Publication-grade training requires real HydroBASINS/HydroATLAS upstream basin context and documented resolution of GEE/ROI issues.
+
+## Full HydroSHEDS / HydroATLAS Completion
+
+For publication-grade basin context, run the full HydroSHEDS/HydroATLAS workflow. Raw zip, geodatabase, shapefile, and unpacked files are written under `data/raw_external/hydrosheds_full/`, remain gitignored, and are represented only by manifest, index, and report rows.
+
+```powershell
+python -m arctic_doc_data_audit.cli download-hydrosheds-full --all
+python -m arctic_doc_data_audit.cli index-hydrosheds-full
+python -m arctic_doc_data_audit.cli match-stations-to-hydrorivers
+python -m arctic_doc_data_audit.cli match-stations-to-hydrobasins
+python -m arctic_doc_data_audit.cli build-upstream-basin-context
+python -m arctic_doc_data_audit.cli extract-hydroatlas-attributes
+python -m arctic_doc_data_audit.cli build-training-matrix
+python -m arctic_doc_data_audit.cli model-readiness
+python -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_YYYYMMDD_v3
+```
+
+The workflow parses official HydroSHEDS product pages first and uses `configs/hydrosheds_full.yaml` manual URLs only as a fallback. Station snapping uses HydroRIVERS; station basin matching uses HydroBASINS levels 6-9; upstream membership is built from `NEXT_DOWN` topology and never from ROI area. Publication-grade readiness is true only when all six rivers have upstream HydroBASINS context plus HydroATLAS attributes marked as complete or partial.

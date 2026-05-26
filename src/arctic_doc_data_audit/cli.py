@@ -118,6 +118,48 @@ def complete_basin_context() -> None:
     run_complete_basin_context()
 
 
+def download_hydrosheds_full(args: argparse.Namespace) -> None:
+    from .hydrosheds_full import download_hydrosheds_full as run_download_hydrosheds_full
+
+    run_download_hydrosheds_full(all_products=args.all)
+
+
+def index_hydrosheds_full() -> None:
+    from .hydrosheds_full import index_hydrosheds_full as run_index_hydrosheds_full
+
+    run_index_hydrosheds_full()
+
+
+def match_stations_to_hydrorivers() -> None:
+    from .hydrosheds_full import match_stations_to_hydrorivers as run_match_stations_to_hydrorivers
+
+    run_match_stations_to_hydrorivers()
+
+
+def match_stations_to_hydrobasins() -> None:
+    from .hydrosheds_full import match_stations_to_hydrobasins as run_match_stations_to_hydrobasins
+
+    run_match_stations_to_hydrobasins()
+
+
+def build_upstream_basin_context() -> None:
+    from .hydrosheds_full import build_upstream_basin_context as run_build_upstream_basin_context
+
+    run_build_upstream_basin_context()
+
+
+def extract_hydroatlas_attributes() -> None:
+    from .hydrosheds_full import extract_hydroatlas_attributes as run_extract_hydroatlas_attributes
+
+    run_extract_hydroatlas_attributes()
+
+
+def build_basin_context_from_hydrosheds() -> None:
+    from .hydrosheds_full import build_basin_context_from_hydrosheds as run_build_basin_context_from_hydrosheds
+
+    run_build_basin_context_from_hydrosheds()
+
+
 def finalize_candidate_sources(args: argparse.Namespace) -> None:
     from .data_completion import finalize_candidate_sources as run_finalize
 
@@ -206,6 +248,14 @@ def build_parser() -> argparse.ArgumentParser:
     gee.add_argument("--years", default="", help="Year range such as 2016-2025.")
     gee.add_argument("--roi-set", default="final_primary", help="ROI set to use.")
     subparsers.add_parser("complete-basin-context", help="Complete or explicitly approximate basin context status.")
+    hydrosheds_download = subparsers.add_parser("download-hydrosheds-full", help="Download or record full HydroSHEDS/HydroATLAS products without committing raw data.")
+    hydrosheds_download.add_argument("--all", action="store_true", help="Use all enabled products from configs/hydrosheds_full.yaml.")
+    subparsers.add_parser("index-hydrosheds-full", help="Index local HydroSHEDS/HydroATLAS full-product vector layers.")
+    subparsers.add_parser("match-stations-to-hydrorivers", help="Snap six configured stations to HydroRIVERS reaches.")
+    subparsers.add_parser("match-stations-to-hydrobasins", help="Match six configured stations to HydroBASINS levels 6-9.")
+    subparsers.add_parser("build-upstream-basin-context", help="Build upstream HydroBASINS membership and aggregation tables.")
+    subparsers.add_parser("extract-hydroatlas-attributes", help="Extract HydroATLAS attributes for upstream basin membership.")
+    subparsers.add_parser("build-basin-context-from-hydrosheds", help="Run station matching, upstream aggregation, and HydroATLAS extraction.")
     finalize = subparsers.add_parser("finalize-candidate-sources", help="Finalize candidate source status without promotion or model training.")
     finalize.add_argument("--defer-datastream", action="store_true", help="Mark DataStream as deferred by user and not blocking full training.")
     subparsers.add_parser("audit-old-snapshot", help="Audit old project snapshot files and generate inventory/raw-compare tables.")
@@ -281,6 +331,28 @@ def main(argv: Iterable[str] | None = None) -> None:
         complete_basin_context()
         generate_reports()
         logger.info("Basin context completion finished without model training.")
+    elif args.command == "download-hydrosheds-full":
+        download_hydrosheds_full(args)
+        logger.info("Full HydroSHEDS/HydroATLAS acquisition step finished without model training.")
+    elif args.command == "index-hydrosheds-full":
+        index_hydrosheds_full()
+        logger.info("Full HydroSHEDS/HydroATLAS index step finished without model training.")
+    elif args.command == "match-stations-to-hydrorivers":
+        match_stations_to_hydrorivers()
+        logger.info("Station-to-HydroRIVERS matching finished without model training.")
+    elif args.command == "match-stations-to-hydrobasins":
+        match_stations_to_hydrobasins()
+        logger.info("Station-to-HydroBASINS matching finished without model training.")
+    elif args.command == "build-upstream-basin-context":
+        build_upstream_basin_context()
+        logger.info("Upstream basin aggregation finished without model training.")
+    elif args.command == "extract-hydroatlas-attributes":
+        extract_hydroatlas_attributes()
+        logger.info("HydroATLAS attribute extraction finished without model training.")
+    elif args.command == "build-basin-context-from-hydrosheds":
+        build_basin_context_from_hydrosheds()
+        generate_reports()
+        logger.info("HydroSHEDS/HydroATLAS basin context build finished without model training.")
     elif args.command == "finalize-candidate-sources":
         finalize_candidate_sources(args)
         generate_reports()

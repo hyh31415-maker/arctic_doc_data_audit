@@ -20,7 +20,7 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
 gee = ["earthengine-api>=0.1.390"]
-geo = ["geopandas>=0.14", "shapely>=2.0"]
+geo = ["geopandas>=0.14", "pyogrio>=0.7", "shapely>=2.0", "pyproj>=3.6"]
 
 [project.scripts]
 arctic-doc-data-audit = "arctic_doc_data_audit.cli:main"

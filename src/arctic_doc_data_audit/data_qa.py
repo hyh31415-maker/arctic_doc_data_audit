@@ -350,7 +350,10 @@ def data_qa_issues() -> pd.DataFrame:
 
     basin_status = _read_table_file("basin_context_status.csv")
     basin_value = str(basin_status.iloc[0].get("basin_context_status", "")) if not basin_status.empty else "missing"
-    if basin_value != "complete":
+    basin_publication_ready = False
+    if not basin_status.empty and "accepted_for_publication_grade_training" in basin_status.columns:
+        basin_publication_ready = basin_status["accepted_for_publication_grade_training"].astype(str).str.lower().isin(["true", "1"]).any()
+    if not basin_publication_ready:
         issues.append({"issue_id": f"QA-{issue_id:04d}", "severity": "high", "source_id": "hydrobasins;hydroatlas", "table_name": "basin_context_canonical", "river": "", "year": "", "issue_type": "approximate_basin_context", "current_status": basin_value or "missing", "recommended_action": "Provide real HydroBASINS/HydroATLAS upstream basin files for publication-grade training.", "blocking_for_baseline": False, "blocking_for_full_training": False, "blocking_for_publication": True, "notes": "Approximate ROI context can support core model runs that do not use basin-level attributes."})
         issue_id += 1
 

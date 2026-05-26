@@ -79,8 +79,13 @@ def test_optical_matching_distinguishes_regenerated_vs_legacy() -> None:
 
 def test_approximate_basin_context_not_publication_ready() -> None:
     report = (REPORT_DIR / "data_freeze_report.md").read_text(encoding="utf-8")
-    assert "basin_context_status: `approximate_roi_context`" in report
-    assert "READY_FOR_PUBLICATION_GRADE_TRAINING: `False`" in report
+    if "basin_context_status: `approximate_roi_context`" in report:
+        assert "READY_FOR_PUBLICATION_GRADE_TRAINING: `False`" in report
+    elif "READY_FOR_PUBLICATION_GRADE_TRAINING: `True`" in report:
+        status = _table("basin_context_status.csv")
+        assert status["accepted_for_publication_grade_training"].astype(str).str.lower().isin(["true", "1"]).any()
+    else:
+        assert "READY_FOR_PUBLICATION_GRADE_TRAINING: `False`" in report
 
 
 def test_datastream_and_mdpi_do_not_block_core_full_readiness() -> None:

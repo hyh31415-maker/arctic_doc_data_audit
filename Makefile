@@ -1,4 +1,4 @@
-.PHONY: init download-arcticgro download-candidates preprocess build-matrix complete-data-sources audit-candidate-labels model-readiness freeze-data qa-data fix-gee-failures discover-wqp-characteristics gee-auth-check run-gee-extraction complete-basin-context finalize-candidate-sources report test
+.PHONY: init download-arcticgro download-candidates preprocess build-matrix complete-data-sources audit-candidate-labels model-readiness freeze-data qa-data fix-gee-failures discover-wqp-characteristics gee-auth-check run-gee-extraction complete-basin-context download-hydrosheds-full index-hydrosheds-full match-stations-to-hydrorivers match-stations-to-hydrobasins build-upstream-basin-context extract-hydroatlas-attributes build-basin-context-from-hydrosheds finalize-candidate-sources report test
 
 PYTHON ?= python
 
@@ -49,6 +49,27 @@ run-gee-extraction:
 
 complete-basin-context:
 	$(PYTHON) -m arctic_doc_data_audit.cli complete-basin-context
+
+download-hydrosheds-full:
+	$(PYTHON) -m arctic_doc_data_audit.cli download-hydrosheds-full --all
+
+index-hydrosheds-full:
+	$(PYTHON) -m arctic_doc_data_audit.cli index-hydrosheds-full
+
+match-stations-to-hydrorivers:
+	$(PYTHON) -m arctic_doc_data_audit.cli match-stations-to-hydrorivers
+
+match-stations-to-hydrobasins:
+	$(PYTHON) -m arctic_doc_data_audit.cli match-stations-to-hydrobasins
+
+build-upstream-basin-context:
+	$(PYTHON) -m arctic_doc_data_audit.cli build-upstream-basin-context
+
+extract-hydroatlas-attributes:
+	$(PYTHON) -m arctic_doc_data_audit.cli extract-hydroatlas-attributes
+
+build-basin-context-from-hydrosheds:
+	$(PYTHON) -m arctic_doc_data_audit.cli build-basin-context-from-hydrosheds
 
 finalize-candidate-sources:
 	$(PYTHON) -m arctic_doc_data_audit.cli finalize-candidate-sources --defer-datastream

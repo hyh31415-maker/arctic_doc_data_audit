@@ -187,6 +187,11 @@ def generate_data_availability_report() -> Path:
     gee_final_status = _read_output_table("gee_regeneration_final_status.csv")
     data_qa_issues = _read_output_table("data_qa_issues.csv")
     source_priority = _read_output_table("source_priority_audit.csv")
+    hydrosheds_download = _read_output_table("hydrosheds_full_download_inventory.csv")
+    hydrobasins_index = _read_output_table("hydrobasins_layer_index.csv")
+    hydrorivers_index = _read_output_table("hydrorivers_layer_index.csv")
+    hydroatlas_index = _read_output_table("hydroatlas_layer_index.csv")
+    upstream_agg = _read_output_table("upstream_basin_aggregation.csv")
 
     report = [
         "# Data Availability Report",
@@ -278,6 +283,22 @@ def generate_data_availability_report() -> Path:
         "## Basin Context Acquisition Status",
         _md_table(basin_status),
         "",
+        "## Full HydroSHEDS/HydroATLAS Acquisition",
+        _md_table(_count_table(hydrosheds_download, ["source_id", "download_status"], "files") if not hydrosheds_download.empty else hydrosheds_download),
+        "",
+        "## Full HydroSHEDS/HydroATLAS Layer Index",
+        "### HydroBASINS",
+        _md_table(_count_table(hydrobasins_index, ["dataset_family", "region", "level", "read_status"], "layers") if not hydrobasins_index.empty else hydrobasins_index),
+        "",
+        "### HydroRIVERS",
+        _md_table(_count_table(hydrorivers_index, ["dataset_family", "region", "read_status"], "layers") if not hydrorivers_index.empty else hydrorivers_index),
+        "",
+        "### HydroATLAS",
+        _md_table(_count_table(hydroatlas_index, ["dataset_family", "read_status"], "layers") if not hydroatlas_index.empty else hydroatlas_index),
+        "",
+        "## Upstream Basin Aggregation Status",
+        _md_table(upstream_agg),
+        "",
         "## GEE Extraction Plan Summary",
         _md_table(_count_table(gee_plan, ["source_id", "estimated_output_table", "needs_regeneration"], "planned_tasks") if not gee_plan.empty else gee_plan),
         "",
@@ -329,6 +350,12 @@ def generate_provenance_report() -> Path:
     source_priority_policy = _read_output_table("source_priority_policy.csv")
     training_source_audit = _read_output_table("training_matrix_source_audit.csv")
     freeze_hashes = _read_output_table("data_freeze_canonical_hashes.csv")
+    hydrosheds_download = _read_output_table("hydrosheds_full_download_inventory.csv")
+    hydrosheds_index = _read_output_table("hydrosheds_file_index.csv")
+    station_rivers = _read_output_table("station_to_hydroriver_match.csv")
+    station_basins = _read_output_table("station_to_hydrobasin_match.csv")
+    upstream_agg = _read_output_table("upstream_basin_aggregation.csv")
+    hydroatlas_attrs = _read_output_table("hydroatlas_attributes_by_river.csv")
     tables = {
         "doc_labels_canonical": labels,
         "lab_optical_proxy_canonical": absorbance,
@@ -407,6 +434,24 @@ def generate_provenance_report() -> Path:
         "",
         "### Data Freeze Canonical Hashes",
         _md_table(freeze_hashes),
+        "",
+        "### Full HydroSHEDS/HydroATLAS Download Inventory",
+        _md_table(hydrosheds_download),
+        "",
+        "### Full HydroSHEDS/HydroATLAS File Index",
+        _md_table(hydrosheds_index),
+        "",
+        "### Station To HydroRIVERS Matches",
+        _md_table(station_rivers),
+        "",
+        "### Station To HydroBASINS Matches",
+        _md_table(station_basins),
+        "",
+        "### Upstream Basin Aggregation",
+        _md_table(upstream_agg),
+        "",
+        "### HydroATLAS Attribute Extraction",
+        _md_table(hydroatlas_attrs),
         "",
         "### Old Snapshot Raw Decisions",
             _md_table(_count_table(raw_compare, ["decision"], "file_count") if not raw_compare.empty else raw_compare),

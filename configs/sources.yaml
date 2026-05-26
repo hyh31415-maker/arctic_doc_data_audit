@@ -322,3 +322,124 @@ sources:
     raw_commit_allowed: false
     notes: "Basin attributes, not DOC label data."
     local_subdir: data/raw_external/hydrosheds
+
+  - source_id: hydrobasins_standard_full
+    source_family: HydroSHEDS
+    data_role: basin context geometry
+    source_url: https://www.hydrosheds.org/products/hydrobasins
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Full continental HydroBASINS standard all-level zip files, version from filename."
+    raw_commit_allowed: false
+    notes: "Full acquisition target for publication-grade upstream basin context; raw zips and unpacked files are gitignored."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: hydrobasins_custom_lakes_full
+    source_family: HydroSHEDS
+    data_role: basin context geometry fallback
+    source_url: https://www.hydrosheds.org/products/hydrobasins
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Full continental HydroBASINS customized-with-lakes all-level zip files, version from filename."
+    raw_commit_allowed: false
+    notes: "Secondary/fallback geometry source; not DOC label data."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: hydrobasins_pour_points_full
+    source_family: HydroSHEDS
+    data_role: basin outlet auxiliary
+    source_url: https://www.hydrosheds.org/products/hydrobasins
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "HydroBASINS pour-point levels from filename."
+    raw_commit_allowed: false
+    notes: "Auxiliary outlet matching source for basin QA."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: hydrorivers_global
+    source_family: HydroSHEDS
+    data_role: river network snapping
+    source_url: https://www.hydrosheds.org/products/hydrorivers
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "HydroRIVERS version from filename."
+    raw_commit_allowed: false
+    notes: "Primary HydroRIVERS global geodatabase source for station-to-reach snapping."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: hydrorivers_global_fallback_shapefile
+    source_family: HydroSHEDS
+    data_role: river network snapping fallback
+    source_url: https://www.hydrosheds.org/products/hydrorivers
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "HydroRIVERS shapefile version from filename."
+    raw_commit_allowed: false
+    notes: "Fallback only if geodatabase read fails or config enables shapefile fallbacks."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: basinatlas_global_gdb
+    source_family: HydroATLAS
+    data_role: basin attributes
+    source_url: https://www.hydrosheds.org/hydroatlas
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Global BasinATLAS geodatabase version from product release."
+    raw_commit_allowed: false
+    notes: "Publication-grade basin attribute source; raw geodatabase is gitignored."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: riveratlas_global_gdb
+    source_family: HydroATLAS
+    data_role: river reach attributes
+    source_url: https://www.hydrosheds.org/hydroatlas
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Global RiverATLAS geodatabase version from product release."
+    raw_commit_allowed: false
+    notes: "Station reach attribute source; raw geodatabase is gitignored."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: lakeatlas_global_gdb
+    source_family: HydroATLAS
+    data_role: optional lake context
+    source_url: https://www.hydrosheds.org/hydroatlas
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Global LakeATLAS geodatabase version from product release."
+    raw_commit_allowed: false
+    notes: "Optional upstream lake-context source; absence should not block core training readiness."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: basinatlas_global_shp_fallback
+    source_family: HydroATLAS
+    data_role: basin attributes fallback
+    source_url: https://www.hydrosheds.org/hydroatlas
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Global BasinATLAS shapefile fallback version from product release."
+    raw_commit_allowed: false
+    notes: "Fallback only if geodatabase read fails or config enables shapefile fallbacks."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: riveratlas_global_shp_fallback
+    source_family: HydroATLAS
+    data_role: river reach attributes fallback
+    source_url: https://www.hydrosheds.org/hydroatlas
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Global RiverATLAS shapefile fallback version from product release."
+    raw_commit_allowed: false
+    notes: "Fallback only if geodatabase read fails or config enables shapefile fallbacks."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: lakeatlas_global_shp_fallback
+    source_family: HydroATLAS
+    data_role: optional lake context fallback
+    source_url: https://www.hydrosheds.org/hydroatlas
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "Global LakeATLAS shapefile fallback version from product release."
+    raw_commit_allowed: false
+    notes: "Optional fallback only if geodatabase read fails or config enables shapefile fallbacks."
+    local_subdir: data/raw_external/hydrosheds_full

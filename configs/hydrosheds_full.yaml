@@ -1,0 +1,29 @@
+download_root: data/raw_external/hydrosheds_full
+unpack_root: data/raw_external/hydrosheds_full/unpacked
+
+prefer_formats:
+  hydrobasins: shapefile_or_gpkg_if_available
+  hydrorivers: geodatabase
+  hydroatlas: geodatabase
+
+download_products:
+  hydrobasins_standard_full: true
+  hydrobasins_custom_lakes_full: true
+  hydrobasins_pour_points_full: true
+  hydrorivers_global: true
+  hydrorivers_continental_fallback: true
+  basinatlas_global_gdb: true
+  riveratlas_global_gdb: true
+  lakeatlas_global_gdb: true
+  shapefile_fallbacks: false
+
+disk_safety:
+  min_free_space_gb: 80
+  allow_continue_if_space_unknown: false
+
+official_pages:
+  hydrobasins: https://www.hydrosheds.org/products/hydrobasins
+  hydrorivers: https://www.hydrosheds.org/products/hydrorivers
+  hydroatlas: https://www.hydrosheds.org/hydroatlas
+
+manual_download_urls: {}

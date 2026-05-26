@@ -79,6 +79,33 @@ def freeze_data(args: argparse.Namespace) -> None:
     run_freeze(args.freeze_id, run_tests=True)
 
 
+def gee_auth_check() -> None:
+    from .gee_regeneration import gee_auth_check as run_check
+
+    run_check()
+
+
+def run_gee_extraction(args: argparse.Namespace) -> None:
+    from .gee_regeneration import run_all_gee_extractions, run_gee_extraction as run_one
+
+    if args.all:
+        run_all_gee_extractions(roi_set=args.roi_set)
+    else:
+        run_one(args.source, args.rivers, args.years, args.roi_set)
+
+
+def complete_basin_context() -> None:
+    from .data_completion import complete_basin_context as run_complete_basin_context
+
+    run_complete_basin_context()
+
+
+def finalize_candidate_sources(args: argparse.Namespace) -> None:
+    from .data_completion import finalize_candidate_sources as run_finalize
+
+    run_finalize(defer_datastream=args.defer_datastream)
+
+
 def audit_old_snapshot() -> None:
     from .preprocess import old_snapshot
 
@@ -148,6 +175,16 @@ def build_parser() -> argparse.ArgumentParser:
     candidate_audit.add_argument("--promote-approved", action="store_true", help="Promote only explicitly approved candidates; default is no promotion.")
     freeze = subparsers.add_parser("freeze-data", help="Create data freeze reports and hashes without training a model.")
     freeze.add_argument("--freeze-id", required=True, help="Freeze identifier, e.g. data_freeze_YYYYMMDD_v1.")
+    subparsers.add_parser("gee-auth-check", help="Check Earth Engine authentication without printing credentials.")
+    gee = subparsers.add_parser("run-gee-extraction", help="Run regenerated GEE extraction without model training.")
+    gee.add_argument("--all", action="store_true", help="Run all configured GEE regenerated extraction sources.")
+    gee.add_argument("--source", default="hls", choices=["hls", "sentinel2", "landsat_c2", "era5_land", "modis_snow", "smap"], help="Single GEE source to extract.")
+    gee.add_argument("--rivers", default="all", help="Comma-separated rivers or all.")
+    gee.add_argument("--years", default="", help="Year range such as 2016-2025.")
+    gee.add_argument("--roi-set", default="final_primary", help="ROI set to use.")
+    subparsers.add_parser("complete-basin-context", help="Complete or explicitly approximate basin context status.")
+    finalize = subparsers.add_parser("finalize-candidate-sources", help="Finalize candidate source status without promotion or model training.")
+    finalize.add_argument("--defer-datastream", action="store_true", help="Mark DataStream as deferred by user and not blocking full training.")
     subparsers.add_parser("audit-old-snapshot", help="Audit old project snapshot files and generate inventory/raw-compare tables.")
     promote = subparsers.add_parser("promote-old-snapshot", help="Promote audited old snapshot families into canonical tables.")
     promote.add_argument("--families", default="", help="Comma-separated families: roi,hydroclimate,optical,auxiliary,raw_compare.")
@@ -193,6 +230,22 @@ def main(argv: Iterable[str] | None = None) -> None:
     elif args.command == "freeze-data":
         freeze_data(args)
         logger.info("Data freeze report generated without model training.")
+    elif args.command == "gee-auth-check":
+        gee_auth_check()
+        logger.info("GEE auth check completed without model training.")
+    elif args.command == "run-gee-extraction":
+        run_gee_extraction(args)
+        build_training_matrix()
+        model_readiness()
+        logger.info("GEE regenerated extraction completed without model training.")
+    elif args.command == "complete-basin-context":
+        complete_basin_context()
+        generate_reports()
+        logger.info("Basin context completion finished without model training.")
+    elif args.command == "finalize-candidate-sources":
+        finalize_candidate_sources(args)
+        generate_reports()
+        logger.info("Candidate sources finalized without model training.")
     elif args.command == "audit-old-snapshot":
         audit_old_snapshot()
         generate_reports()

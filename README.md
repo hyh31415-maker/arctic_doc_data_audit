@@ -29,6 +29,10 @@ python -m arctic_doc_data_audit.cli complete-data-sources --all
 python -m arctic_doc_data_audit.cli audit-candidate-labels
 python -m arctic_doc_data_audit.cli model-readiness
 python -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_YYYYMMDD_v1
+python -m arctic_doc_data_audit.cli gee-auth-check
+python -m arctic_doc_data_audit.cli run-gee-extraction --all
+python -m arctic_doc_data_audit.cli complete-basin-context
+python -m arctic_doc_data_audit.cli finalize-candidate-sources --defer-datastream
 python -m arctic_doc_data_audit.cli report
 python -m pytest
 ```
@@ -45,6 +49,10 @@ make complete-data-sources
 make audit-candidate-labels
 make model-readiness
 make freeze-data
+make gee-auth-check
+make run-gee-extraction
+make complete-basin-context
+make finalize-candidate-sources
 make report
 make test
 ```
@@ -142,3 +150,19 @@ python -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_YYYYMMDD
 ```
 
 `complete-data-sources` queries or indexes remaining candidate sources, records failures/manual requirements in the manifest, and writes candidate QC tables without promotion. `audit-candidate-labels` produces a promotion plan only by default. `model-readiness` checks label counts, predictor completeness, optical match windows, season-window coverage, source composition, and ROI review status. `freeze-data` hashes canonical tables and declares whether the data freeze is ready for baseline or full training. None of these commands trains a model.
+
+## Full Data Completion v2
+
+When Earth Engine credentials are available locally, run the v2 completion flow:
+
+```powershell
+python -m arctic_doc_data_audit.cli gee-auth-check
+python -m arctic_doc_data_audit.cli run-gee-extraction --all
+python -m arctic_doc_data_audit.cli complete-basin-context
+python -m arctic_doc_data_audit.cli finalize-candidate-sources --defer-datastream
+python -m arctic_doc_data_audit.cli build-training-matrix
+python -m arctic_doc_data_audit.cli model-readiness
+python -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_YYYYMMDD_v2
+```
+
+Regenerated GEE rows use non-legacy source ids (`gee_hls_s30_l30`, `gee_sentinel2_sr_harmonized`, `gee_landsat_c2_l2`, `gee_era5_land`, `gee_modis_mod10a1`). Legacy snapshot rows remain auditable reference rows, while the training matrix prefers regenerated hydroclimate when both are present. DataStream can be explicitly deferred with `--defer-datastream`; MDPI supplements remain optional/manual mechanism context after HTTP 403. The freeze report still states that no model, DOC prediction, or flux product was generated.

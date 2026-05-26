@@ -42,7 +42,15 @@ def run() -> pd.DataFrame:
     if not hydro.empty:
         hydro = hydro.copy()
         hydro["date"] = pd.to_datetime(hydro["date"], errors="coerce").dt.date.astype(str)
+        hydro["_source_priority"] = hydro.get("quality_flag", pd.Series(index=hydro.index, dtype=str)).astype(str).eq("regenerated_gee").map({True: 2, False: 1})
+        hydro["_source_priority"] = hydro["_source_priority"].where(~hydro.get("source_id", pd.Series(index=hydro.index, dtype=str)).astype(str).eq("old_arctic_doc_snowmelt_untrained_data"), 0)
         hydro_cols = ["river", "date", "temperature_2m_C", "positive_degree_day_Cday", "snow_cover_fraction", "snow_depletion_rate_7d", "surface_runoff_m"]
+        hydro = hydro.sort_values(["river", "date", "_source_priority"])
+        hydro = (
+            hydro[hydro_cols + ["_source_priority"]]
+            .groupby(["river", "date"], as_index=False)
+            .agg({column: (lambda series: series.dropna().iloc[-1] if not series.dropna().empty else pd.NA) for column in hydro_cols if column not in {"river", "date"}})
+        )
         out = out.merge(hydro[hydro_cols], on=["river", "date"], how="left")
     for column in ["temperature_2m_C", "positive_degree_day_Cday", "snow_cover_fraction", "snow_depletion_rate_7d", "surface_runoff_m"]:
         if column not in out.columns:
@@ -73,4 +81,3 @@ def run() -> pd.DataFrame:
         raise ValueError(f"Lab optical leakage in training matrix: {sorted(leak)}")
     write_table(frame, "training_matrix_daily_predictable", PROCESSED_DIR / "training_matrix_daily_predictable.csv")
     return frame
-

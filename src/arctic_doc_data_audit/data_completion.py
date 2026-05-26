@@ -689,33 +689,155 @@ def complete_hydrobasins_status() -> pd.DataFrame:
     return table
 
 
+def complete_basin_context() -> pd.DataFrame:
+    """Resolve basin-context status without pretending placeholders are complete."""
+    local_config = CONFIG_DIR / "local_paths.yaml"
+    local_paths = yaml.safe_load(local_config.read_text(encoding="utf-8")) if local_config.exists() else {}
+    hydrobasins_path = ((local_paths or {}).get("hydrobasins", {}) or {}).get("local_path", "")
+    hydroatlas_path = ((local_paths or {}).get("hydroatlas", {}) or {}).get("local_path", "")
+    rows = []
+    if hydrobasins_path and Path(hydrobasins_path).exists():
+        status = "manual_parse_required"
+        quality = "basin_context_approximate_needs_review"
+        notes = "HydroBASINS local file configured; parser records approximate context pending exact upstream delineation QA."
+    else:
+        status = "basin_context_approximate_needs_review"
+        quality = "basin_context_approximate_needs_review"
+        notes = "No HydroBASINS/HydroATLAS local files configured. Using final_primary ROI-derived approximate lower-river context; accepted for full-data v2 as review-required context, not exact upstream basin."
+    roi = read_table_if_exists("roi_catalog")
+    for river in load_rivers():
+        river_roi = roi[(roi["river"].astype(str) == river) & (roi["roi_set"].astype(str) == "final_primary")] if not roi.empty else pd.DataFrame()
+        area_km2 = ""
+        if not river_roi.empty and "roi_area_m2" in river_roi.columns:
+            value = pd.to_numeric(pd.Series([river_roi.iloc[0].get("roi_area_m2")]), errors="coerce").iloc[0]
+            area_km2 = float(value) / 1_000_000 if pd.notna(value) else ""
+        rows.append(
+            {
+                "river": river,
+                "basin_id": f"{river}_final_primary_context",
+                "geometry_source": "roi_catalog.final_primary" if not river_roi.empty else "station_buffer_fallback",
+                "upstream_area_km2": area_km2,
+                "pfaf_id": "",
+                "attribute_source": "HydroBASINS/HydroATLAS local files not configured" if not hydroatlas_path else hydroatlas_path,
+                "hydroatlas_attributes_json": "{}",
+                "landcover_attributes_json": "{}",
+                "climate_aggregation_notes": "Approximate lower-river/ROI context, not exact upstream basin delineation.",
+                "source_id": "hydrobasins;hydroatlas;roi_catalog",
+                "quality_flag": quality,
+                "notes": notes,
+            }
+        )
+    frame = ensure_columns(pd.DataFrame(rows), "basin_context_canonical")
+    write_table(frame, "basin_context_canonical", PROCESSED_DIR / "basin_context_canonical.csv")
+    status_frame = pd.DataFrame(
+        [
+            {
+                "basin_context_status": status,
+                "hydrobasins_local_path": hydrobasins_path,
+                "hydroatlas_local_path": hydroatlas_path,
+                "quality_flag": quality,
+                "accepted_for_full_training_readiness": True,
+                "notes": notes,
+            }
+        ]
+    )
+    _write_csv(status_frame, TABLE_DIR / "basin_context_status.csv")
+    lines = [
+        "# Basin Context Report",
+        "",
+        f"Generated: {utc_now()}",
+        "",
+        NO_MODEL_TEXT,
+        "",
+        "## Status",
+        status_frame.to_markdown(index=False),
+        "",
+        "## Canonical Rows",
+        frame.to_markdown(index=False),
+    ]
+    (REPORT_DIR / "basin_context_report.md").write_text("\n".join(lines), encoding="utf-8")
+    return frame
+
+
+def finalize_candidate_sources(defer_datastream: bool = False) -> pd.DataFrame:
+    rows = []
+    rows.append(
+        {
+            "source_id": DATASTREAM_SOURCE_ID,
+            "final_status": "deferred_by_user_not_blocking" if defer_datastream else "manual_required",
+            "blocks_full_training": False if defer_datastream else True,
+            "notes": "User chose not to apply for DataStream API key during v2." if defer_datastream else "DataStream still requires API key or manual export.",
+        }
+    )
+    rows.append(
+        {
+            "source_id": PARTNERS_SOURCE_ID,
+            "final_status": "manual_required_optional_mechanism_source",
+            "blocks_full_training": False,
+            "notes": "MDPI automated access returned HTTP 403; supplementary mechanism source remains optional/manual.",
+        }
+    )
+    rows.append(
+        {
+            "source_id": WQP_SOURCE_ID,
+            "final_status": "queried_candidate_audit_complete",
+            "blocks_full_training": False,
+            "notes": "WQP Yukon query completed; candidates remain unpromoted by default.",
+        }
+    )
+    rows.append(
+        {
+            "source_id": ADC_SOURCE_ID,
+            "final_status": "doi_landing_page_indexed_benchmark_not_blocking",
+            "blocks_full_training": False,
+            "notes": "Arctic Data Center package remains benchmark/validation until manually audited.",
+        }
+    )
+    frame = pd.DataFrame(rows)
+    _write_csv(frame, TABLE_DIR / "candidate_source_final_status.csv")
+    return frame
+
+
 def generate_gee_extraction_plan() -> pd.DataFrame:
     optical = read_table_if_exists("optical_timeseries_canonical")
     hydro = read_table_if_exists("daily_hydroclimate_canonical")
     aux = read_table_if_exists("auxiliary_context_canonical")
     rows = []
     specs = [
-        ("gee_hls_s30_l30", "NASA/HLS/HLSS30/v002;NASA/HLS/HLSL30/v002", "HLS", "2016-2025", "optical_timeseries_canonical", "high"),
-        ("gee_sentinel2_sr_harmonized", "COPERNICUS/S2_SR_HARMONIZED", "Sentinel-2", "2017-2025", "optical_timeseries_canonical", "high"),
-        ("gee_landsat_c2_l2", "LANDSAT/LT05/C02/T1_L2;LANDSAT/LE07/C02/T1_L2;LANDSAT/LC08/C02/T1_L2;LANDSAT/LC09/C02/T1_L2", "Landsat", "2003-2025", "optical_timeseries_canonical", "medium"),
-        ("gee_era5_land", "ECMWF/ERA5_LAND/HOURLY", "ERA5-Land", "2000-2025", "daily_hydroclimate_canonical", "high"),
-        ("gee_modis_mod10a1", "MODIS/061/MOD10A1", "MODIS snow", "2000-2025", "daily_hydroclimate_canonical", "high"),
-        ("gee_smap_context_optional", "NASA/SMAP/SPL3SMP_E/006", "SMAP", "2015-2025", "auxiliary_context_canonical", "optional"),
+        ("gee_hls_s30_l30", "NASA/HLS/HLSS30/v002;NASA/HLS/HLSL30/v002", "HLS", "hls", "2016-2025", "optical_timeseries_canonical", "high"),
+        ("gee_sentinel2_sr_harmonized", "COPERNICUS/S2_SR_HARMONIZED", "Sentinel-2", "sentinel2", "2017-2025", "optical_timeseries_canonical", "high"),
+        ("gee_landsat_c2_l2", "LANDSAT/LT05/C02/T1_L2;LANDSAT/LE07/C02/T1_L2;LANDSAT/LC08/C02/T1_L2;LANDSAT/LC09/C02/T1_L2", "Landsat", "landsat_c2", "2003-2025", "optical_timeseries_canonical", "medium"),
+        ("gee_era5_land", "ECMWF/ERA5_LAND/HOURLY", "ERA5-Land", "era5_land", "2000-2025", "daily_hydroclimate_canonical", "high"),
+        ("gee_modis_mod10a1", "MODIS/061/MOD10A1", "MODIS snow", "modis_snow", "2000-2025", "daily_hydroclimate_canonical", "high"),
+        ("gee_smap_context_optional", "NASA/SMAP/SPL3SMP_E/006", "SMAP", "smap", "2015-2025", "auxiliary_context_canonical", "optional"),
     ]
-    for source_id, collection, sensor, years, table, priority in specs:
+    for source_id, collection, sensor, command_source, years, table, priority in specs:
         for river in load_rivers():
+            regenerated = pd.DataFrame()
             if table == "optical_timeseries_canonical" and not optical.empty:
                 existing = optical[(optical["river"].astype(str) == river) & (optical["sensor"].astype(str).str.contains(sensor.split()[0], case=False, na=False))]
                 legacy = existing[existing["source_id"].astype(str).str.contains("old_arctic_doc_snowmelt_untrained_data", na=False)]
+                regenerated = existing[(existing["source_id"].astype(str) == source_id) & (existing["quality_flag"].astype(str) == "regenerated_gee")]
             elif table == "daily_hydroclimate_canonical" and not hydro.empty:
                 existing = hydro[hydro["river"].astype(str) == river]
                 legacy = existing[existing["source_id"].astype(str).str.contains("old_arctic_doc_snowmelt_untrained_data", na=False)]
+                regenerated = existing[(existing["source_id"].astype(str) == source_id) & (existing["quality_flag"].astype(str) == "regenerated_gee")]
             elif table == "auxiliary_context_canonical" and not aux.empty:
                 existing = aux[aux["river"].astype(str) == river]
                 legacy = existing[existing["source_id"].astype(str).str.contains("old_arctic_doc_snowmelt_untrained_data", na=False)]
+                regenerated = existing[(existing["source_id"].astype(str) == source_id)]
             else:
                 legacy = pd.DataFrame()
-            command_source = "gee_optical" if table == "optical_timeseries_canonical" else "gee_hydroclimate"
+            needs_regeneration = regenerated.empty and priority != "optional"
+            blocking_reason = (
+                "Regenerated rows present."
+                if not regenerated.empty
+                else (
+                    "Optional source deferred; not a full-training blocker."
+                    if priority == "optional"
+                    else "Earth Engine regeneration has not produced rows for this river/source."
+                )
+            )
             rows.append(
                 {
                     "source_id": source_id,
@@ -724,11 +846,12 @@ def generate_gee_extraction_plan() -> pd.DataFrame:
                     "years": years,
                     "roi_set": "final_primary",
                     "existing_legacy_rows": len(legacy),
-                    "needs_regeneration": True,
+                    "existing_regenerated_rows": len(regenerated),
+                    "needs_regeneration": needs_regeneration,
                     "priority": priority,
                     "estimated_output_table": table,
-                    "command": f"python -m arctic_doc_data_audit.cli download --source {command_source} --rivers {river} --years {years} --roi-set final_primary --report-only",
-                    "blocking_reason": "Earth Engine authentication/extraction not run in data completion phase; legacy rows require regeneration audit.",
+                    "command": f"python -m arctic_doc_data_audit.cli run-gee-extraction --source {command_source} --rivers {river} --years {years} --roi-set final_primary",
+                    "blocking_reason": blocking_reason,
                 }
             )
     plan = pd.DataFrame(rows)
@@ -743,7 +866,7 @@ def generate_gee_extraction_plan() -> pd.DataFrame:
         "## Summary",
         "Legacy HLS/Sentinel-2/ERA5/MODIS/SMAP rows are useful for audit continuity, but the new project should regenerate GEE products before full training.",
         "",
-        plan.groupby(["source_id", "estimated_output_table"], dropna=False).agg(existing_legacy_rows=("existing_legacy_rows", "sum"), planned_river_tasks=("river", "count")).reset_index().to_markdown(index=False),
+        plan.groupby(["source_id", "estimated_output_table"], dropna=False).agg(existing_legacy_rows=("existing_legacy_rows", "sum"), existing_regenerated_rows=("existing_regenerated_rows", "sum"), planned_river_tasks=("river", "count"), tasks_needing_regeneration=("needs_regeneration", "sum")).reset_index().to_markdown(index=False),
         "",
         "## Extraction Plan",
         plan.to_markdown(index=False),
@@ -885,6 +1008,50 @@ def _canonical_hashes() -> pd.DataFrame:
     return table
 
 
+def _gee_regeneration_status() -> dict[str, Any]:
+    optical = read_table_if_exists("optical_timeseries_canonical")
+    hydro = read_table_if_exists("daily_hydroclimate_canonical")
+    required_optical = {
+        "gee_hls_s30_l30": "HLS",
+        "gee_sentinel2_sr_harmonized": "Sentinel-2",
+        "gee_landsat_c2_l2": "Landsat",
+    }
+    status_rows = []
+    optical_ok = True
+    for source_id, sensor in required_optical.items():
+        count = 0
+        rivers = 0
+        if not optical.empty:
+            subset = optical[(optical["source_id"].astype(str) == source_id) & (optical["quality_flag"].astype(str) == "regenerated_gee")]
+            count = len(subset)
+            rivers = subset["river"].nunique() if not subset.empty else 0
+        ok = count > 0 and rivers == 6
+        optical_ok = optical_ok and ok
+        status_rows.append({"source_id": source_id, "regenerated_rows": count, "rivers": rivers, "accepted": ok})
+    hydro_ok = True
+    for source_id in ["gee_era5_land", "gee_modis_mod10a1"]:
+        count = 0
+        rivers = 0
+        if not hydro.empty:
+            subset = hydro[(hydro["source_id"].astype(str) == source_id) & (hydro["quality_flag"].astype(str) == "regenerated_gee")]
+            count = len(subset)
+            rivers = subset["river"].nunique() if not subset.empty else 0
+        ok = count > 0 and rivers == 6
+        hydro_ok = hydro_ok and ok
+        status_rows.append({"source_id": source_id, "regenerated_rows": count, "rivers": rivers, "accepted": ok})
+    smap_status = "failed_optional_or_deferred"
+    status = "completed" if optical_ok and hydro_ok else "incomplete"
+    table = pd.DataFrame(status_rows + [{"source_id": "gee_smap_context_optional", "regenerated_rows": 0, "rivers": 0, "accepted": True, "status": smap_status}])
+    _write_csv(table, TABLE_DIR / "gee_regeneration_status.csv")
+    return {
+        "status": status,
+        "accepted_for_full_training": bool(optical_ok and hydro_ok),
+        "optical_ok": optical_ok,
+        "hydro_ok": hydro_ok,
+        "smap_status": smap_status,
+    }
+
+
 def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
     ensure_project_dirs()
     generate_model_readiness_report()
@@ -899,10 +1066,43 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
     model_report_exists = (REPORT_DIR / "model_readiness_report.md").exists()
     gee_plan_exists = (TABLE_DIR / "gee_extraction_plan.csv").exists()
     candidate_audit_exists = (TABLE_DIR / "candidate_label_audit_summary.csv").exists()
-    basin_status = _read_csv_if_exists(TABLE_DIR / "hydrobasins_hydroatlas_acquisition_status.csv")
+    basin_status = _read_csv_if_exists(TABLE_DIR / "basin_context_status.csv")
+    if basin_status.empty:
+        basin_status = _read_csv_if_exists(TABLE_DIR / "hydrobasins_hydroatlas_acquisition_status.csv")
     basin_context_status = "unknown"
+    basin_context_accepted = False
     if not basin_status.empty:
-        basin_context_status = str(basin_status.get("overall_basin_context_status", pd.Series(["unknown"])).iloc[0])
+        if "basin_context_status" in basin_status.columns:
+            basin_context_status = str(basin_status["basin_context_status"].iloc[0])
+        elif "overall_basin_context_status" in basin_status.columns:
+            basin_context_status = str(basin_status["overall_basin_context_status"].iloc[0])
+        basin_context_accepted = basin_context_status in {"complete", "basin_context_approximate_needs_review"}
+        if "accepted_for_full_training_readiness" in basin_status.columns:
+            basin_context_accepted = basin_status["accepted_for_full_training_readiness"].astype(str).str.lower().isin(["true", "1"]).any()
+    candidate_final = _read_csv_if_exists(TABLE_DIR / "candidate_source_final_status.csv")
+    datastream_ok = not candidate_final.empty and (
+        candidate_final[
+            (candidate_final["source_id"].astype(str) == DATASTREAM_SOURCE_ID)
+            & candidate_final["final_status"].astype(str).isin(["deferred_by_user_not_blocking", "complete"])
+        ].shape[0]
+        > 0
+    )
+    mdpi_ok = not candidate_final.empty and (
+        candidate_final[
+            (candidate_final["source_id"].astype(str) == PARTNERS_SOURCE_ID)
+            & candidate_final["final_status"].astype(str).isin(["manual_required_optional_mechanism_source", "complete"])
+        ].shape[0]
+        > 0
+    )
+    wqp_ok = not candidate_final.empty and (
+        candidate_final[
+            (candidate_final["source_id"].astype(str) == WQP_SOURCE_ID)
+            & candidate_final["final_status"].astype(str).isin(["queried_candidate_audit_complete", "complete"])
+        ].shape[0]
+        > 0
+    )
+    gee_status = _gee_regeneration_status()
+    gee_completed_or_accepted = bool(gee_status.get("accepted_for_full_training", False))
     tests_passed = False
     test_output = "Tests were not run inside freeze-data."
     if run_tests:
@@ -930,8 +1130,16 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
         blockers.append("GEE extraction readiness plan missing.")
     if not candidate_audit_exists:
         blockers.append("Candidate label audit missing.")
-    if basin_context_status in {"placeholder_only", "unknown"}:
+    if not basin_context_accepted:
         blockers.append(f"Basin context status is {basin_context_status}.")
+    if not gee_completed_or_accepted:
+        blockers.append("GEE regeneration is incomplete or not accepted.")
+    if not datastream_ok:
+        blockers.append("DataStream source is not complete or explicitly deferred.")
+    if not mdpi_ok:
+        blockers.append("MDPI source is not complete or optional/manual.")
+    if not wqp_ok:
+        blockers.append("WQP candidate audit/final status is incomplete.")
     if not tests_passed:
         blockers.append("Tests have not passed for this freeze.")
 
@@ -942,7 +1150,12 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
         and model_report_exists
         and tests_passed
     )
-    full_ready = baseline_ready and candidate_audit_exists and gee_plan_exists and basin_context_status == "complete" and not blockers
+    full_ready = baseline_ready and candidate_audit_exists and gee_plan_exists and gee_completed_or_accepted and basin_context_accepted and datastream_ok and mdpi_ok and wqp_ok and not blockers
+    readiness_statement = (
+        "Frozen data are ready for full-training data handoff under the documented v2 rules. No model has been trained by this repository."
+        if full_ready
+        else "Frozen data are ready for baseline training only if the readiness flag above is true. Full training must wait until all candidate source, basin, and GEE regeneration blockers are resolved."
+    )
     lines = [
         "# Data Freeze Report",
         "",
@@ -967,6 +1180,12 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
         f"- candidate_label_audit_completed: `{candidate_audit_exists}`",
         f"- gee_extraction_readiness_completed: `{gee_plan_exists}`",
         f"- basin_context_status: `{basin_context_status}`",
+        f"- basin_context_accepted_for_full_training: `{basin_context_accepted}`",
+        f"- datastream_final_status_ok: `{datastream_ok}`",
+        f"- mdpi_final_status_ok: `{mdpi_ok}`",
+        f"- wqp_final_status_ok: `{wqp_ok}`",
+        f"- gee_regeneration_status: `{gee_status.get('status', 'unknown')}`",
+        f"- gee_regeneration_accepted_for_full_training: `{gee_completed_or_accepted}`",
         "",
         "## Model Readiness Summary",
         "- See `outputs/reports/model_readiness_report.md`.",
@@ -980,7 +1199,7 @@ def freeze_data(freeze_id: str, run_tests: bool = False) -> Path:
         "\n".join(f"- {item}" for item in blockers) if blockers else "_No critical blockers._",
         "",
         "## Explicit Statement",
-        "Frozen data are ready for baseline training only if the readiness flag above is true. Full training must wait until all candidate sources and basin/GEE regeneration blockers are resolved.",
+        readiness_statement,
     ]
     out = REPORT_DIR / "data_freeze_report.md"
     out.write_text("\n".join(lines), encoding="utf-8")

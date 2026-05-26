@@ -178,8 +178,12 @@ def generate_data_availability_report() -> Path:
     promotion = _read_output_table("old_snapshot_promotion_summary.csv")
     hydro_unmapped = _read_output_table("old_snapshot_hydroclimate_unmapped_columns.csv")
     candidate_summary = _read_output_table("candidate_label_audit_summary.csv")
-    basin_status = _read_output_table("hydrobasins_hydroatlas_acquisition_status.csv")
+    candidate_final = _read_output_table("candidate_source_final_status.csv")
+    basin_status = _read_output_table("basin_context_status.csv")
+    if basin_status.empty:
+        basin_status = _read_output_table("hydrobasins_hydroatlas_acquisition_status.csv")
     gee_plan = _read_output_table("gee_extraction_plan.csv")
+    gee_status = _read_output_table("gee_regeneration_status.csv")
 
     report = [
         "# Data Availability Report",
@@ -265,11 +269,17 @@ def generate_data_availability_report() -> Path:
         "## Data Completion Candidate Label Audit",
         _md_table(candidate_summary),
         "",
+        "## Candidate Source Final Status",
+        _md_table(candidate_final),
+        "",
         "## Basin Context Acquisition Status",
         _md_table(basin_status),
         "",
         "## GEE Extraction Plan Summary",
         _md_table(_count_table(gee_plan, ["source_id", "estimated_output_table", "needs_regeneration"], "planned_tasks") if not gee_plan.empty else gee_plan),
+        "",
+        "## GEE Regeneration Status",
+        _md_table(gee_status),
         "",
         "## 13. Explicit Warnings",
         "- Do not use lab absorbance as production daily predictor.",
@@ -300,6 +310,9 @@ def generate_provenance_report() -> Path:
     raw_compare = _read_output_table("old_snapshot_raw_compare.csv")
     promotion = _read_output_table("old_snapshot_promotion_summary.csv")
     candidate_summary = _read_output_table("candidate_label_audit_summary.csv")
+    candidate_final = _read_output_table("candidate_source_final_status.csv")
+    basin_status = _read_output_table("basin_context_status.csv")
+    gee_status = _read_output_table("gee_regeneration_status.csv")
     freeze_hashes = _read_output_table("data_freeze_canonical_hashes.csv")
     tables = {
         "doc_labels_canonical": labels,
@@ -358,6 +371,15 @@ def generate_provenance_report() -> Path:
         "",
         "### Candidate Label Audit Summary",
         _md_table(candidate_summary),
+        "",
+        "### Candidate Source Final Status",
+        _md_table(candidate_final),
+        "",
+        "### Basin Context Status",
+        _md_table(basin_status),
+        "",
+        "### GEE Regeneration Status",
+        _md_table(gee_status),
         "",
         "### Data Freeze Canonical Hashes",
         _md_table(freeze_hashes),

@@ -1,4 +1,4 @@
-.PHONY: init download-arcticgro download-candidates preprocess build-matrix complete-data-sources audit-candidate-labels model-readiness freeze-data report test
+.PHONY: init download-arcticgro download-candidates preprocess build-matrix complete-data-sources audit-candidate-labels model-readiness freeze-data gee-auth-check run-gee-extraction complete-basin-context finalize-candidate-sources report test
 
 PYTHON ?= python
 
@@ -31,6 +31,18 @@ model-readiness:
 
 freeze-data:
 	$(PYTHON) -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_$(shell powershell -NoProfile -Command "Get-Date -Format yyyyMMdd")_v1
+
+gee-auth-check:
+	$(PYTHON) -m arctic_doc_data_audit.cli gee-auth-check
+
+run-gee-extraction:
+	$(PYTHON) -m arctic_doc_data_audit.cli run-gee-extraction --all
+
+complete-basin-context:
+	$(PYTHON) -m arctic_doc_data_audit.cli complete-basin-context
+
+finalize-candidate-sources:
+	$(PYTHON) -m arctic_doc_data_audit.cli finalize-candidate-sources --defer-datastream
 
 report:
 	$(PYTHON) -m arctic_doc_data_audit.cli report

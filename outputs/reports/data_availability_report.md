@@ -3,84 +3,344 @@
 This report audits data acquisition and preprocessing readiness only. No DOC model was trained.
 
 ## 1. Download Status Summary
-| source_id                                      | download_status   | failure_reason                                                                                                                |   file_count |
-|:-----------------------------------------------|:------------------|:------------------------------------------------------------------------------------------------------------------------------|-------------:|
-| arctic_data_center_tank_2023                   | downloaded        |                                                                                                                               |            1 |
-| arcticgro_absorbance_archived                  | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
-| arcticgro_absorbance_current                   | downloaded        |                                                                                                                               |            1 |
-| arcticgro_data_page                            | downloaded        |                                                                                                                               |            1 |
-| arcticgro_discharge_archived                   | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
-| arcticgro_discharge_current                    | downloaded        |                                                                                                                               |            7 |
-| arcticgro_spatial_data                         | manual_required   | Spatial folder may contain multiple files; manual review required before download.                                            |            1 |
-| arcticgro_water_quality_archived               | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
-| arcticgro_water_quality_current                | downloaded        |                                                                                                                               |            2 |
-| arcticgro_water_quality_flags                  | manual_required   | Flag codes are extracted during preprocessing from the Water Quality workbook.                                                |            1 |
-| arcticgro_water_quality_metadata               | downloaded        |                                                                                                                               |            1 |
-| arcticgro_water_quality_parameter_descriptions | downloaded        |                                                                                                                               |            1 |
-| datastream_mackenzie_candidate                 | dry_run           | Use DataStream API/hub search for Mackenzie DOC/TOC/CDOM/UV/turbidity candidates; keep candidate-only QC.                     |            1 |
-| datastream_mackenzie_candidate                 | failed            | DATASTREAM_API_KEY is not configured; DataStream API requires x-api-key. Manual/API-key acquisition required.                 |            1 |
-| gee_era5_land                                  | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
-| gee_hls_s30_l30                                | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
-| gee_landsat_c2_l2                              | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
-| gee_modis_mod10a1                              | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
-| gee_sentinel2_sr_harmonized                    | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
-| gee_smap_context_optional                      | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
-| hydroatlas                                     | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                      |            1 |
-| hydrobasins                                    | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                      |            1 |
-| old_arctic_doc_snowmelt_outputs                | downloaded        |                                                                                                                               |            4 |
-| old_arctic_doc_snowmelt_untrained_data         | downloaded        |                                                                                                                               |          166 |
-| partners_mdpi_eurasian_candidate               | dry_run           | Search/download supplementary tables conservatively and preserve article/source citation before parsing.                      |            1 |
-| partners_mdpi_eurasian_candidate               | failed            | HTTP 403;                                                                                                                     |            2 |
-| wqp_usgs_yukon_candidate                       | downloaded        |                                                                                                                               |            6 |
-| wqp_usgs_yukon_candidate                       | dry_run           | Candidate query only; results need label QC before use.                                                                       |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Absorbance at 254 nm is not in the list of enumerated values."             |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic carbon is not in the list of enumerated values."         |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic matter is not in the list of enumerated values."         |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Specific ultraviolet absorbance is not in the list of enumerated values."  |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Suspended sediment concentration is not in the list of enumerated values." |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Total organic carbon is not in the list of enumerated values."             |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=UV Absorbance is not in the list of enumerated values."                    |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Water temperature is not in the list of enumerated values."                |            1 |
+| source_id                                      | download_status   | failure_reason                                                                                                                                   |   file_count |
+|:-----------------------------------------------|:------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------|-------------:|
+| arctic_data_center_tank_2023                   | downloaded        |                                                                                                                                                  |            1 |
+| arcticgro_absorbance_archived                  | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                                                |            1 |
+| arcticgro_absorbance_current                   | downloaded        |                                                                                                                                                  |            1 |
+| arcticgro_data_page                            | downloaded        |                                                                                                                                                  |            1 |
+| arcticgro_discharge_archived                   | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                                                |            1 |
+| arcticgro_discharge_current                    | downloaded        |                                                                                                                                                  |            7 |
+| arcticgro_spatial_data                         | manual_required   | Spatial folder may contain multiple files; manual review required before download.                                                               |            1 |
+| arcticgro_water_quality_archived               | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                                                |            1 |
+| arcticgro_water_quality_current                | downloaded        |                                                                                                                                                  |            2 |
+| arcticgro_water_quality_flags                  | manual_required   | Flag codes are extracted during preprocessing from the Water Quality workbook.                                                                   |            1 |
+| arcticgro_water_quality_metadata               | downloaded        |                                                                                                                                                  |            1 |
+| arcticgro_water_quality_parameter_descriptions | downloaded        |                                                                                                                                                  |            1 |
+| datastream_mackenzie_candidate                 | dry_run           | Use DataStream API/hub search for Mackenzie DOC/TOC/CDOM/UV/turbidity candidates; keep candidate-only QC.                                        |            1 |
+| datastream_mackenzie_candidate                 | failed            | DATASTREAM_API_KEY is not configured; DataStream API requires x-api-key. Manual/API-key acquisition required.                                    |            1 |
+| gee_era5_land                                  | downloaded        |                                                                                                                                                  |          156 |
+| gee_era5_land                                  | failed            | TypeError: Dictionary.set() missing 1 required positional argument: 'value'                                                                      |            1 |
+| gee_era5_land                                  | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                                   |            1 |
+| gee_hls_s30_l30                                | downloaded        |                                                                                                                                                  |           60 |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20160305T220855):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20170220T220857):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20180320T220247):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20190307T220254):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20200316T220853):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20210616T220306):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20220307T220317):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20230214T220331):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20240304T220309):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20250219T220312):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20160312T203459):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20170301T202238):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20180302T203426):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20190226T202839):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20200229T202855):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20210303T202831):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20220306T202834):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20230310T202255):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20240302T203441):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20250226T202847):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20160510T070504):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20170319T065901):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20180407T065844):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20190424T071106):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20200426T071113):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20210226T065921):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20220227T071144):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20230302T071145):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20240314T065930):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20250301T065924):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20160427T055617):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20170329T055620):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20180307T060234):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20190522T055623):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20200501T055002):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20210511T055617):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20220311T055643):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20230407T055641):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20240308T055656):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20250320T055026):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20160320T031638):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20170228T031032):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20180504T032146):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20190304T032218):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20200308T031035):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20210311T031034):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20220304T032239):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20230315T032236):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20240301T032236):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20250328T032230):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20160312T004735):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20170306T005343):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20180318T004717):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20190303T010010):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20200323T004755):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20210308T010025):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20220312T005356):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20230324T004748):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20240310T004755):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20250313T004746):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.                               |            1 |
+| gee_landsat_c2_l2                              | downloaded        |                                                                                                                                                  |          138 |
+| gee_landsat_c2_l2                              | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.                               |            1 |
+| gee_modis_mod10a1                              | downloaded        |                                                                                                                                                  |          156 |
+| gee_modis_mod10a1                              | failed            | EEException: Error in map(ID=2024_01_08):                                                                                                        |            1 |
+|                                                |                   | Number.divide: Parameter 'left' is required and may not be null.                                                                                 |              |
+| gee_modis_mod10a1                              | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                                   |            1 |
+| gee_sentinel2_sr_harmonized                    | downloaded        |                                                                                                                                                  |           54 |
+| gee_sentinel2_sr_harmonized                    | failed            | TypeError: Dictionary.set() missing 1 required positional argument: 'value'                                                                      |            1 |
+| gee_sentinel2_sr_harmonized                    | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.                               |            1 |
+| gee_smap_context_optional                      | failed            | SMAP optional extraction deferred/failed_optional; not a full-training blocker.                                                                  |           66 |
+| gee_smap_context_optional                      | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                                   |            1 |
+| hydroatlas                                     | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                                         |            1 |
+| hydrobasins                                    | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                                         |            1 |
+| old_arctic_doc_snowmelt_outputs                | downloaded        |                                                                                                                                                  |            4 |
+| old_arctic_doc_snowmelt_untrained_data         | downloaded        |                                                                                                                                                  |          166 |
+| partners_mdpi_eurasian_candidate               | dry_run           | Search/download supplementary tables conservatively and preserve article/source citation before parsing.                                         |            1 |
+| partners_mdpi_eurasian_candidate               | failed            | HTTP 403;                                                                                                                                        |            2 |
+| wqp_usgs_yukon_candidate                       | downloaded        |                                                                                                                                                  |            6 |
+| wqp_usgs_yukon_candidate                       | dry_run           | Candidate query only; results need label QC before use.                                                                                          |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Absorbance at 254 nm is not in the list of enumerated values."                                |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic carbon is not in the list of enumerated values."                            |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic matter is not in the list of enumerated values."                            |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Specific ultraviolet absorbance is not in the list of enumerated values."                     |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Suspended sediment concentration is not in the list of enumerated values."                    |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Total organic carbon is not in the list of enumerated values."                                |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=UV Absorbance is not in the list of enumerated values."                                       |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Water temperature is not in the list of enumerated values."                                   |            1 |
 
 ## 2. Source-Level Files, Status, and Failures
-| source_id                                      | download_status   | failure_reason                                                                                                                |   file_count |
-|:-----------------------------------------------|:------------------|:------------------------------------------------------------------------------------------------------------------------------|-------------:|
-| arctic_data_center_tank_2023                   | downloaded        |                                                                                                                               |            1 |
-| arcticgro_absorbance_archived                  | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
-| arcticgro_absorbance_current                   | downloaded        |                                                                                                                               |            1 |
-| arcticgro_data_page                            | downloaded        |                                                                                                                               |            1 |
-| arcticgro_discharge_archived                   | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
-| arcticgro_discharge_current                    | downloaded        |                                                                                                                               |            7 |
-| arcticgro_spatial_data                         | manual_required   | Spatial folder may contain multiple files; manual review required before download.                                            |            1 |
-| arcticgro_water_quality_archived               | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
-| arcticgro_water_quality_current                | downloaded        |                                                                                                                               |            2 |
-| arcticgro_water_quality_flags                  | manual_required   | Flag codes are extracted during preprocessing from the Water Quality workbook.                                                |            1 |
-| arcticgro_water_quality_metadata               | downloaded        |                                                                                                                               |            1 |
-| arcticgro_water_quality_parameter_descriptions | downloaded        |                                                                                                                               |            1 |
-| datastream_mackenzie_candidate                 | dry_run           | Use DataStream API/hub search for Mackenzie DOC/TOC/CDOM/UV/turbidity candidates; keep candidate-only QC.                     |            1 |
-| datastream_mackenzie_candidate                 | failed            | DATASTREAM_API_KEY is not configured; DataStream API requires x-api-key. Manual/API-key acquisition required.                 |            1 |
-| gee_era5_land                                  | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
-| gee_hls_s30_l30                                | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
-| gee_landsat_c2_l2                              | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
-| gee_modis_mod10a1                              | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
-| gee_sentinel2_sr_harmonized                    | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
-| gee_smap_context_optional                      | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
-| hydroatlas                                     | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                      |            1 |
-| hydrobasins                                    | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                      |            1 |
-| old_arctic_doc_snowmelt_outputs                | downloaded        |                                                                                                                               |            4 |
-| old_arctic_doc_snowmelt_untrained_data         | downloaded        |                                                                                                                               |          166 |
-| partners_mdpi_eurasian_candidate               | dry_run           | Search/download supplementary tables conservatively and preserve article/source citation before parsing.                      |            1 |
-| partners_mdpi_eurasian_candidate               | failed            | HTTP 403;                                                                                                                     |            2 |
-| wqp_usgs_yukon_candidate                       | downloaded        |                                                                                                                               |            6 |
-| wqp_usgs_yukon_candidate                       | dry_run           | Candidate query only; results need label QC before use.                                                                       |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Absorbance at 254 nm is not in the list of enumerated values."             |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic carbon is not in the list of enumerated values."         |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic matter is not in the list of enumerated values."         |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Specific ultraviolet absorbance is not in the list of enumerated values."  |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Suspended sediment concentration is not in the list of enumerated values." |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Total organic carbon is not in the list of enumerated values."             |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=UV Absorbance is not in the list of enumerated values."                    |            1 |
-| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Water temperature is not in the list of enumerated values."                |            1 |
+| source_id                                      | download_status   | failure_reason                                                                                                                                   |   file_count |
+|:-----------------------------------------------|:------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------|-------------:|
+| arctic_data_center_tank_2023                   | downloaded        |                                                                                                                                                  |            1 |
+| arcticgro_absorbance_archived                  | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                                                |            1 |
+| arcticgro_absorbance_current                   | downloaded        |                                                                                                                                                  |            1 |
+| arcticgro_data_page                            | downloaded        |                                                                                                                                                  |            1 |
+| arcticgro_discharge_archived                   | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                                                |            1 |
+| arcticgro_discharge_current                    | downloaded        |                                                                                                                                                  |            7 |
+| arcticgro_spatial_data                         | manual_required   | Spatial folder may contain multiple files; manual review required before download.                                                               |            1 |
+| arcticgro_water_quality_archived               | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                                                |            1 |
+| arcticgro_water_quality_current                | downloaded        |                                                                                                                                                  |            2 |
+| arcticgro_water_quality_flags                  | manual_required   | Flag codes are extracted during preprocessing from the Water Quality workbook.                                                                   |            1 |
+| arcticgro_water_quality_metadata               | downloaded        |                                                                                                                                                  |            1 |
+| arcticgro_water_quality_parameter_descriptions | downloaded        |                                                                                                                                                  |            1 |
+| datastream_mackenzie_candidate                 | dry_run           | Use DataStream API/hub search for Mackenzie DOC/TOC/CDOM/UV/turbidity candidates; keep candidate-only QC.                                        |            1 |
+| datastream_mackenzie_candidate                 | failed            | DATASTREAM_API_KEY is not configured; DataStream API requires x-api-key. Manual/API-key acquisition required.                                    |            1 |
+| gee_era5_land                                  | downloaded        |                                                                                                                                                  |          156 |
+| gee_era5_land                                  | failed            | TypeError: Dictionary.set() missing 1 required positional argument: 'value'                                                                      |            1 |
+| gee_era5_land                                  | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                                   |            1 |
+| gee_hls_s30_l30                                | downloaded        |                                                                                                                                                  |           60 |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20160305T220855):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20170220T220857):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20180320T220247):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20190307T220254):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20200316T220853):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20210616T220306):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20220307T220317):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20230214T220331):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20240304T220309):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T03VWJ_20250219T220312):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20160312T203459):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20170301T202238):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20180302T203426):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20190226T202839):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20200229T202855):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20210303T202831):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20220306T202834):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20230310T202255):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20240302T203441):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T08WNV_20250226T202847):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20160510T070504):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20170319T065901):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20180407T065844):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20190424T071106):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20200426T071113):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20210226T065921):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20220227T071144):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20230302T071145):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20240314T065930):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T41WPP_20250301T065924):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20160427T055617):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20170329T055620):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20180307T060234):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20190522T055623):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20200501T055002):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20210511T055617):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20220311T055643):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20230407T055641):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20240308T055656):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T44WPC_20250320T055026):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20160320T031638):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20170228T031032):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20180504T032146):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20190304T032218):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20200308T031035):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20210311T031034):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20220304T032239):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20230315T032236):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20240301T032236):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T51WWQ_20250328T032230):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20160312T004735):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20170306T005343):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20180318T004717):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20190303T010010):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20200323T004755):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20210308T010025):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20220312T005356):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20230324T004748):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20240310T004755):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | failed            | EEException: Error in map(ID=T57WWS_20250313T004746):                                                                                            |            1 |
+|                                                |                   | Image.select: Band pattern 'B02' did not match any bands. Available bands: [B1, B2, B3, B4, B5, B6, B7, B9, B10, B11, Fmask, SZA, SAA, VZA, VAA] |              |
+| gee_hls_s30_l30                                | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.                               |            1 |
+| gee_landsat_c2_l2                              | downloaded        |                                                                                                                                                  |          138 |
+| gee_landsat_c2_l2                              | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.                               |            1 |
+| gee_modis_mod10a1                              | downloaded        |                                                                                                                                                  |          156 |
+| gee_modis_mod10a1                              | failed            | EEException: Error in map(ID=2024_01_08):                                                                                                        |            1 |
+|                                                |                   | Number.divide: Parameter 'left' is required and may not be null.                                                                                 |              |
+| gee_modis_mod10a1                              | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                                   |            1 |
+| gee_sentinel2_sr_harmonized                    | downloaded        |                                                                                                                                                  |           54 |
+| gee_sentinel2_sr_harmonized                    | failed            | TypeError: Dictionary.set() missing 1 required positional argument: 'value'                                                                      |            1 |
+| gee_sentinel2_sr_harmonized                    | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.                               |            1 |
+| gee_smap_context_optional                      | failed            | SMAP optional extraction deferred/failed_optional; not a full-training blocker.                                                                  |           66 |
+| gee_smap_context_optional                      | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                                   |            1 |
+| hydroatlas                                     | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                                         |            1 |
+| hydrobasins                                    | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                                         |            1 |
+| old_arctic_doc_snowmelt_outputs                | downloaded        |                                                                                                                                                  |            4 |
+| old_arctic_doc_snowmelt_untrained_data         | downloaded        |                                                                                                                                                  |          166 |
+| partners_mdpi_eurasian_candidate               | dry_run           | Search/download supplementary tables conservatively and preserve article/source citation before parsing.                                         |            1 |
+| partners_mdpi_eurasian_candidate               | failed            | HTTP 403;                                                                                                                                        |            2 |
+| wqp_usgs_yukon_candidate                       | downloaded        |                                                                                                                                                  |            6 |
+| wqp_usgs_yukon_candidate                       | dry_run           | Candidate query only; results need label QC before use.                                                                                          |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Absorbance at 254 nm is not in the list of enumerated values."                                |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic carbon is not in the list of enumerated values."                            |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic matter is not in the list of enumerated values."                            |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Specific ultraviolet absorbance is not in the list of enumerated values."                     |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Suspended sediment concentration is not in the list of enumerated values."                    |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Total organic carbon is not in the list of enumerated values."                                |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=UV Absorbance is not in the list of enumerated values."                                       |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Water temperature is not in the list of enumerated values."                                   |            1 |
 
 ## 3. DOC Label Counts by River
 | river     |   raw_count |   canonical_count |   Tier_A |   Tier_B |   Tier_C |   Tier_D |   can_train_doc_model |   can_train_daily_flux_model |
@@ -236,53 +496,62 @@ This report audits data acquisition and preprocessing readiness only. No DOC mod
 ## 7. Hydroclimate Daily Coverage
 | river     | first_date   | last_date   |   n_days |   n_nonmissing |
 |:----------|:-------------|:------------|---------:|---------------:|
-| Kolyma    | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
-| Lena      | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
-| Mackenzie | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
-| Ob        | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
-| Yenisey   | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
-| Yukon     | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Kolyma    | 2000-01-01   | 2025-12-31  |     9497 |          23072 |
+| Lena      | 2000-01-01   | 2025-12-31  |     9497 |          23072 |
+| Mackenzie | 2000-01-01   | 2025-12-31  |     9497 |          23072 |
+| Ob        | 2000-01-01   | 2025-12-31  |     9497 |          23072 |
+| Yenisey   | 2000-01-01   | 2025-12-31  |     9497 |          23072 |
+| Yukon     | 2000-01-01   | 2025-12-31  |     9497 |          23072 |
 
 ## 8. Optical Proxy Coverage by Sensor
 | river     | sensor     |   optical_rows |
 |:----------|:-----------|---------------:|
-| Kolyma    | HLS        |           7347 |
-| Lena      | HLS        |           7380 |
-| Lena      | Sentinel-2 |            440 |
-| Mackenzie | HLS        |           7436 |
-| Ob        | HLS        |           8164 |
-| Ob        | Sentinel-2 |            719 |
-| Yenisey   | HLS        |           8886 |
-| Yenisey   | Sentinel-2 |           1136 |
-| Yukon     | HLS        |           7854 |
+| Kolyma    | HLS        |          18967 |
+| Kolyma    | Landsat    |           1324 |
+| Kolyma    | Sentinel-2 |           1077 |
+| Lena      | HLS        |          19027 |
+| Lena      | Landsat    |            894 |
+| Lena      | Sentinel-2 |           1573 |
+| Mackenzie | HLS        |          19215 |
+| Mackenzie | Landsat    |           2019 |
+| Mackenzie | Sentinel-2 |           1112 |
+| Ob        | HLS        |          20961 |
+| Ob        | Landsat    |            880 |
+| Ob        | Sentinel-2 |           3025 |
+| Yenisey   | HLS        |          22720 |
+| Yenisey   | Landsat    |            766 |
+| Yenisey   | Sentinel-2 |           4338 |
+| Yukon     | HLS        |          20524 |
+| Yukon     | Landsat    |           1053 |
+| Yukon     | Sentinel-2 |           2583 |
 
 ## 9. Optical Matched DOC Sample Count
 | river     |   window_days |   matched_doc_samples |
 |:----------|--------------:|----------------------:|
-| Ob        |             0 |                    18 |
-| Ob        |             1 |                    20 |
-| Ob        |             3 |                    21 |
-| Ob        |             7 |                    22 |
-| Yenisey   |             0 |                    16 |
-| Yenisey   |             1 |                    23 |
-| Yenisey   |             3 |                    23 |
-| Yenisey   |             7 |                    23 |
-| Lena      |             0 |                    15 |
-| Lena      |             1 |                    18 |
-| Lena      |             3 |                    18 |
-| Lena      |             7 |                    18 |
-| Kolyma    |             0 |                    19 |
-| Kolyma    |             1 |                    22 |
-| Kolyma    |             3 |                    23 |
-| Kolyma    |             7 |                    24 |
-| Yukon     |             0 |                    20 |
-| Yukon     |             1 |                    26 |
-| Yukon     |             3 |                    28 |
-| Yukon     |             7 |                    29 |
-| Mackenzie |             0 |                    20 |
-| Mackenzie |             1 |                    23 |
-| Mackenzie |             3 |                    24 |
-| Mackenzie |             7 |                    25 |
+| Ob        |             0 |                    37 |
+| Ob        |             1 |                    53 |
+| Ob        |             3 |                    61 |
+| Ob        |             7 |                    66 |
+| Yenisey   |             0 |                    38 |
+| Yenisey   |             1 |                    54 |
+| Yenisey   |             3 |                    63 |
+| Yenisey   |             7 |                    75 |
+| Lena      |             0 |                    29 |
+| Lena      |             1 |                    47 |
+| Lena      |             3 |                    62 |
+| Lena      |             7 |                    70 |
+| Kolyma    |             0 |                    36 |
+| Kolyma    |             1 |                    59 |
+| Kolyma    |             3 |                    70 |
+| Kolyma    |             7 |                    78 |
+| Yukon     |             0 |                    41 |
+| Yukon     |             1 |                    58 |
+| Yukon     |             3 |                    81 |
+| Yukon     |             7 |                    88 |
+| Mackenzie |             0 |                    44 |
+| Mackenzie |             1 |                    70 |
+| Mackenzie |             3 |                    81 |
+| Mackenzie |             7 |                    89 |
 
 ## Old Project Snapshot Breakdown
 | old_project_subdir   |   file_count |
@@ -386,7 +655,12 @@ This report audits data acquisition and preprocessing readiness only. No DOC mod
 |:-----------------------------|:---------------------------------------|-------:|
 | doc_labels_canonical         | arcticgro_water_quality_current        |    595 |
 | doc_labels_canonical         | old_arctic_doc_snowmelt_untrained_data |      0 |
+| daily_hydroclimate_canonical | gee_era5_land                          |  56982 |
+| daily_hydroclimate_canonical | gee_modis_mod10a1                      |  56250 |
 | daily_hydroclimate_canonical | old_arctic_doc_snowmelt_untrained_data |  25200 |
+| optical_timeseries_canonical | gee_hls_s30_l30                        |  74347 |
+| optical_timeseries_canonical | gee_landsat_c2_l2                      |   6936 |
+| optical_timeseries_canonical | gee_sentinel2_sr_harmonized            |  11413 |
 | optical_timeseries_canonical | old_arctic_doc_snowmelt_untrained_data |  49362 |
 | roi_catalog                  | old_arctic_doc_snowmelt_untrained_data |     39 |
 | auxiliary_context_canonical  | old_arctic_doc_snowmelt_untrained_data |  86324 |
@@ -993,21 +1267,38 @@ Deduplication groups records by river, station, date, parameter, and sample id w
 | wqp_usgs_yukon_candidate | organic_carbon_unspecified_fraction | D                |              197 |
 | wqp_usgs_yukon_candidate | proxy_or_context                    | Excluded         |              245 |
 
+## Candidate Source Final Status
+| source_id                        | final_status                                    | blocks_full_training   | notes                                                                                            |
+|:---------------------------------|:------------------------------------------------|:-----------------------|:-------------------------------------------------------------------------------------------------|
+| datastream_mackenzie_candidate   | deferred_by_user_not_blocking                   | False                  | User chose not to apply for DataStream API key during v2.                                        |
+| partners_mdpi_eurasian_candidate | manual_required_optional_mechanism_source       | False                  | MDPI automated access returned HTTP 403; supplementary mechanism source remains optional/manual. |
+| wqp_usgs_yukon_candidate         | queried_candidate_audit_complete                | False                  | WQP Yukon query completed; candidates remain unpromoted by default.                              |
+| arctic_data_center_tank_2023     | doi_landing_page_indexed_benchmark_not_blocking | False                  | Arctic Data Center package remains benchmark/validation until manually audited.                  |
+
 ## Basin Context Acquisition Status
-| source_id   | source_url                                      | local_path   | local_path_exists   | download_status   | basin_context_status   | failure_reason                                                                           | notes                                | overall_basin_context_status   |
-|:------------|:------------------------------------------------|:-------------|:--------------------|:------------------|:-----------------------|:-----------------------------------------------------------------------------------------|:-------------------------------------|:-------------------------------|
-| hydrobasins | https://www.hydrosheds.org/products/hydrobasins |              | False               | manual_required   | placeholder_only       | Large HydroBASINS/HydroATLAS files require manual download and configs/local_paths.yaml. | Basin context is not DOC label data. | placeholder_only               |
-| hydroatlas  | https://www.hydrosheds.org/products/hydroatlas  |              | False               | manual_required   | placeholder_only       | Large HydroBASINS/HydroATLAS files require manual download and configs/local_paths.yaml. | Basin context is not DOC label data. | placeholder_only               |
+| basin_context_status                   | hydrobasins_local_path   | hydroatlas_local_path   | quality_flag                           | accepted_for_full_training_readiness   | notes                                                                                                                                                                                              |
+|:---------------------------------------|:-------------------------|:------------------------|:---------------------------------------|:---------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| basin_context_approximate_needs_review |                          |                         | basin_context_approximate_needs_review | True                                   | No HydroBASINS/HydroATLAS local files configured. Using final_primary ROI-derived approximate lower-river context; accepted for full-data v2 as review-required context, not exact upstream basin. |
 
 ## GEE Extraction Plan Summary
 | source_id                   | estimated_output_table       | needs_regeneration   |   planned_tasks |
 |:----------------------------|:-----------------------------|:---------------------|----------------:|
-| gee_era5_land               | daily_hydroclimate_canonical | True                 |               6 |
-| gee_hls_s30_l30             | optical_timeseries_canonical | True                 |               6 |
-| gee_landsat_c2_l2           | optical_timeseries_canonical | True                 |               6 |
-| gee_modis_mod10a1           | daily_hydroclimate_canonical | True                 |               6 |
-| gee_sentinel2_sr_harmonized | optical_timeseries_canonical | True                 |               6 |
-| gee_smap_context_optional   | auxiliary_context_canonical  | True                 |               6 |
+| gee_era5_land               | daily_hydroclimate_canonical | False                |               6 |
+| gee_hls_s30_l30             | optical_timeseries_canonical | False                |               6 |
+| gee_landsat_c2_l2           | optical_timeseries_canonical | False                |               6 |
+| gee_modis_mod10a1           | daily_hydroclimate_canonical | False                |               6 |
+| gee_sentinel2_sr_harmonized | optical_timeseries_canonical | False                |               6 |
+| gee_smap_context_optional   | auxiliary_context_canonical  | False                |               6 |
+
+## GEE Regeneration Status
+| source_id                   |   regenerated_rows |   rivers | accepted   | status                      |
+|:----------------------------|-------------------:|---------:|:-----------|:----------------------------|
+| gee_hls_s30_l30             |              74347 |        6 | True       |                             |
+| gee_sentinel2_sr_harmonized |              11413 |        6 | True       |                             |
+| gee_landsat_c2_l2           |               6936 |        6 | True       |                             |
+| gee_era5_land               |              56982 |        6 | True       |                             |
+| gee_modis_mod10a1           |              56250 |        6 | True       |                             |
+| gee_smap_context_optional   |                  0 |        0 | True       | failed_optional_or_deferred |
 
 ## 13. Explicit Warnings
 - Do not use lab absorbance as production daily predictor.

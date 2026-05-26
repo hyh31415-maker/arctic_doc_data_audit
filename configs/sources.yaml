@@ -443,3 +443,47 @@ sources:
     raw_commit_allowed: false
     notes: "Optional fallback only if geodatabase read fails or config enables shapefile fallbacks."
     local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: hydroatlas_technical_documentation
+    source_family: HydroATLAS
+    data_role: documentation
+    source_url: https://data.hydrosheds.org/file/technical-documentation/HydroATLAS_TechDoc_v10_1.pdf
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "HydroATLAS technical documentation v10.1 PDF."
+    raw_commit_allowed: false
+    notes: "Documentation only; supports provenance and attribute interpretation."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: basinatlas_catalog_pdf
+    source_family: HydroATLAS
+    data_role: documentation
+    source_url: https://data.hydrosheds.org/file/technical-documentation/BasinATLAS_Catalog_v10.pdf
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "BasinATLAS Catalog v10 PDF."
+    raw_commit_allowed: false
+    notes: "Documentation only; supports BasinATLAS attribute interpretation."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: riveratlas_catalog_pdf
+    source_family: HydroATLAS
+    data_role: documentation
+    source_url: https://data.hydrosheds.org/file/technical-documentation/RiverATLAS_Catalog_v10.pdf
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "RiverATLAS Catalog v10 PDF."
+    raw_commit_allowed: false
+    notes: "Documentation only; supports RiverATLAS attribute interpretation."
+    local_subdir: data/raw_external/hydrosheds_full
+
+  - source_id: lakeatlas_catalog_pdf
+    source_family: HydroATLAS
+    data_role: documentation
+    source_url: https://data.hydrosheds.org/file/technical-documentation/LakeATLAS_Catalog_v10.pdf
+    official_or_secondary: official
+    expected_update_frequency: occasional
+    version_policy: "LakeATLAS Catalog v10 PDF."
+    raw_commit_allowed: false
+    notes: "Documentation only; supports LakeATLAS attribute interpretation."
+    local_subdir: data/raw_external/hydrosheds_full

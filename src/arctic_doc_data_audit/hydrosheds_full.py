@@ -15,7 +15,7 @@ import pandas as pd
 import requests
 import yaml
 
-from .manifest import append_manifest, manifest_failure, manifest_for_file, read_manifest, sha256_file, utc_now
+from .manifest import append_manifest, manifest_failure, manifest_for_file, read_manifest, sha256_file, utc_now, write_manifest
 from .normalize import load_rivers, station_for_river
 from .paths import CONFIG_DIR, PROCESSED_DIR, RAW_EXTERNAL_DIR, REPORT_DIR, TABLE_DIR, ensure_project_dirs, path, relpath
 from .schemas import ensure_columns, read_table_if_exists, write_table
@@ -79,6 +79,7 @@ class DownloadProduct:
     url_pattern: str
     enabled: bool = True
     optional: bool = False
+    file_name: str = ""
 
 
 def _write_csv(frame: pd.DataFrame, destination: Path) -> Path:
@@ -175,7 +176,18 @@ def _head_size(url: str) -> int | str:
         if response.ok and response.headers.get("content-length"):
             return int(response.headers["content-length"])
     except Exception:
-        return ""
+        pass
+    try:
+        response = requests.get(url, timeout=30, stream=True, allow_redirects=True, headers={"Range": "bytes=0-0"})
+        content_range = response.headers.get("content-range", "")
+        response.close()
+        match = re.search(r"/(\d+)$", content_range)
+        if match:
+            return int(match.group(1))
+        if response.headers.get("content-length") and response.status_code == 200:
+            return int(response.headers["content-length"])
+    except Exception:
+        pass
     return ""
 
 
@@ -272,12 +284,16 @@ def _products(config: dict[str, Any], include_disabled: bool = False) -> list[Do
     atlas_page = pages.get("hydroatlas", "https://www.hydrosheds.org/hydroatlas")
     products.extend(
         [
-            DownloadProduct("basinatlas_global_gdb", "HydroATLAS BasinATLAS", "Global BasinATLAS geodatabase", "Global", "geodatabase_zip", "", atlas_page, "figshare.com/ndownloader/files/20082137", bool(enabled.get("basinatlas_global_gdb", True))),
-            DownloadProduct("riveratlas_global_gdb", "HydroATLAS RiverATLAS", "Global RiverATLAS geodatabase", "Global", "geodatabase_zip", "", atlas_page, "figshare.com/ndownloader/files/20087321", bool(enabled.get("riveratlas_global_gdb", True))),
-            DownloadProduct("lakeatlas_global_gdb", "HydroATLAS LakeATLAS", "Global LakeATLAS geodatabase", "Global", "geodatabase_zip", "", atlas_page, "figshare.com/ndownloader/files/35959544", bool(enabled.get("lakeatlas_global_gdb", True)), optional=True),
-            DownloadProduct("basinatlas_global_shp_fallback", "HydroATLAS BasinATLAS shapefile fallback", "Global BasinATLAS shapefile fallback", "Global", "shapefile_zip", "", atlas_page, "figshare.com/ndownloader/files/20087237", bool(enabled.get("shapefile_fallbacks", False)), optional=True),
-            DownloadProduct("riveratlas_global_shp_fallback", "HydroATLAS RiverATLAS shapefile fallback", "Global RiverATLAS shapefile fallback", "Global", "shapefile_zip", "", atlas_page, "figshare.com/ndownloader/files/20087486", bool(enabled.get("shapefile_fallbacks", False)), optional=True),
-            DownloadProduct("lakeatlas_global_shp_fallback", "HydroATLAS LakeATLAS shapefile fallback", "Global LakeATLAS shapefile fallback", "Global", "shapefile_zip", "", atlas_page, "figshare.com/ndownloader/files/35959547", bool(enabled.get("shapefile_fallbacks", False)), optional=True),
+            DownloadProduct("basinatlas_global_gdb", "HydroATLAS BasinATLAS", "Global BasinATLAS geodatabase", "Global", "geodatabase_zip", "", atlas_page, "https://ndownloader.figshare.com/files/20082137", bool(enabled.get("basinatlas_global_gdb", True)), file_name="BasinATLAS_Data_v10.gdb.zip"),
+            DownloadProduct("riveratlas_global_gdb", "HydroATLAS RiverATLAS", "Global RiverATLAS geodatabase", "Global", "geodatabase_zip", "", atlas_page, "https://ndownloader.figshare.com/files/20087321", bool(enabled.get("riveratlas_global_gdb", True)), file_name="RiverATLAS_Data_v10.gdb.zip"),
+            DownloadProduct("lakeatlas_global_gdb", "HydroATLAS LakeATLAS", "Global LakeATLAS geodatabase", "Global", "geodatabase_zip", "", atlas_page, "https://ndownloader.figshare.com/files/35959544", bool(enabled.get("lakeatlas_global_gdb", True)), optional=True, file_name="LakeATLAS_Data_v10.gdb.zip"),
+            DownloadProduct("basinatlas_global_shp_fallback", "HydroATLAS BasinATLAS shapefile fallback", "Global BasinATLAS shapefile fallback", "Global", "shapefile_zip", "", atlas_page, "https://ndownloader.figshare.com/files/20087237", bool(enabled.get("shapefile_fallbacks", False)), optional=True, file_name="BasinATLAS_Data_v10_shp.zip"),
+            DownloadProduct("riveratlas_global_shp_fallback", "HydroATLAS RiverATLAS shapefile fallback", "Global RiverATLAS shapefile fallback", "Global", "shapefile_zip", "", atlas_page, "https://ndownloader.figshare.com/files/20087486", bool(enabled.get("shapefile_fallbacks", False)), optional=True, file_name="RiverATLAS_Data_v10_shp.zip"),
+            DownloadProduct("lakeatlas_global_shp_fallback", "HydroATLAS LakeATLAS shapefile fallback", "Global LakeATLAS shapefile fallback", "Global", "shapefile_zip", "", atlas_page, "https://ndownloader.figshare.com/files/35959547", bool(enabled.get("shapefile_fallbacks", False)), optional=True, file_name="LakeATLAS_Data_v10_shp.zip"),
+            DownloadProduct("hydroatlas_technical_documentation", "HydroATLAS documentation", "HydroATLAS technical documentation v10.1", "Global", "pdf", "", atlas_page, "https://data.hydrosheds.org/file/technical-documentation/HydroATLAS_TechDoc_v10_1.pdf", bool(enabled.get("hydroatlas_documentation", True)), optional=True, file_name="HydroATLAS_TechDoc_v10_1.pdf"),
+            DownloadProduct("basinatlas_catalog_pdf", "HydroATLAS documentation", "BasinATLAS Catalog v10", "Global", "pdf", "", atlas_page, "https://data.hydrosheds.org/file/technical-documentation/BasinATLAS_Catalog_v10.pdf", bool(enabled.get("hydroatlas_documentation", True)), optional=True, file_name="BasinATLAS_Catalog_v10.pdf"),
+            DownloadProduct("riveratlas_catalog_pdf", "HydroATLAS documentation", "RiverATLAS Catalog v10", "Global", "pdf", "", atlas_page, "https://data.hydrosheds.org/file/technical-documentation/RiverATLAS_Catalog_v10.pdf", bool(enabled.get("hydroatlas_documentation", True)), optional=True, file_name="RiverATLAS_Catalog_v10.pdf"),
+            DownloadProduct("lakeatlas_catalog_pdf", "HydroATLAS documentation", "LakeATLAS Catalog v10", "Global", "pdf", "", atlas_page, "https://data.hydrosheds.org/file/technical-documentation/LakeATLAS_Catalog_v10.pdf", bool(enabled.get("hydroatlas_documentation", True)), optional=True, file_name="LakeATLAS_Catalog_v10.pdf"),
         ]
     )
     if include_disabled:
@@ -298,6 +314,8 @@ def _resolve_download_url(product: DownloadProduct, discovered: dict[str, list[s
             return url
     if product.url_pattern.startswith("http"):
         return product.url_pattern
+    if product.url_pattern:
+        return f"https://data.hydrosheds.org/file/{product.url_pattern.lstrip('/')}"
     return ""
 
 
@@ -312,25 +330,58 @@ def _safe_extract(zip_path: Path, destination: Path) -> None:
         archive.extractall(destination)
 
 
-def _download_file(url: str, destination: Path) -> tuple[str, str]:
+def _download_file(url: str, destination: Path, expected_size: int | str = "") -> tuple[str, str]:
     destination.parent.mkdir(parents=True, exist_ok=True)
     tmp = destination.with_suffix(destination.suffix + ".part")
+    resume_from = tmp.stat().st_size if tmp.exists() else 0
+    expected = int(expected_size) if str(expected_size).isdigit() else None
+    if expected is not None and resume_from >= expected:
+        tmp.replace(destination)
+        return "downloaded", ""
+    headers = {"Range": f"bytes={resume_from}-"} if resume_from else {}
     try:
-        with requests.get(url, stream=True, timeout=60, allow_redirects=True) as response:
+        with requests.get(url, stream=True, timeout=60, allow_redirects=True, headers=headers) as response:
             response.raise_for_status()
-            with tmp.open("wb") as handle:
+            mode = "ab" if resume_from and response.status_code == 206 else "wb"
+            with tmp.open(mode) as handle:
                 for block in response.iter_content(chunk_size=1024 * 1024):
                     if block:
                         handle.write(block)
-            tmp.replace(destination)
+        if expected is not None and tmp.stat().st_size != expected:
+            return "partial", f"Downloaded {tmp.stat().st_size} bytes; expected {expected} bytes. Resume by rerunning download-hydrosheds-full."
+        tmp.replace(destination)
         return "downloaded", ""
     except Exception as exc:
-        try:
-            if tmp.exists():
-                tmp.unlink()
-        except OSError:
-            pass
         return "failed", str(exc)
+
+
+def _should_unpack(product: DownloadProduct, config: dict[str, Any]) -> bool:
+    policy = config.get("unpack_policy") or {}
+    if product.file_format == "pdf":
+        return bool(policy.get("documentation", False))
+    if product.source_id.startswith("hydrobasins"):
+        return bool(policy.get("hydrobasins", True))
+    if product.source_id.startswith("hydrorivers"):
+        return bool(policy.get("hydrorivers", True))
+    if product.source_id in {"basinatlas_global_gdb", "riveratlas_global_gdb", "lakeatlas_global_gdb"}:
+        return bool(policy.get("hydroatlas_gdb", True))
+    if product.source_id.endswith("_shp_fallback"):
+        return bool(policy.get("hydroatlas_shapefile_fallbacks", False))
+    return zipfile.is_zipfile(Path(product.file_name))
+
+
+def _mark_superseded_manifest_failures(success_source_ids: set[str]) -> None:
+    if not success_source_ids:
+        return
+    manifest = read_manifest()
+    if manifest.empty:
+        return
+    mask = manifest["source_id"].astype(str).isin(success_source_ids) & manifest["download_status"].astype(str).eq("failed")
+    if not mask.any():
+        return
+    manifest.loc[mask, "download_status"] = "superseded_failed"
+    manifest.loc[mask, "failure_reason"] = manifest.loc[mask, "failure_reason"].astype(str) + " | Superseded by later successful stable ndownloader/data.hydrosheds download."
+    write_manifest(manifest)
 
 
 def download_hydrosheds_full(all_products: bool = False) -> pd.DataFrame:
@@ -354,15 +405,17 @@ def download_hydrosheds_full(all_products: bool = False) -> pd.DataFrame:
     pages = sorted({product.official_page for product in products})
     discovered = {page: _discover_urls(page) for page in pages}
     manual = _manual_urls(config)
-    manifest = read_manifest()
 
     rows: list[dict[str, Any]] = []
+    successful_source_ids: set[str] = set()
     for product in products:
         url = _resolve_download_url(product, discovered, manual)
-        file_name = _url_basename(url, _safe_name(product.product_name) + ".zip") if url else _safe_name(product.product_name) + ".zip"
+        file_name = product.file_name or (_url_basename(url, _safe_name(product.product_name) + ".zip") if url else _safe_name(product.product_name) + ".zip")
         local_zip = download_root / product.source_id / file_name
         unpacked = unpack_root / product.source_id / Path(file_name).stem
         size = ""
+        expected_size = ""
+        size_check_status = ""
         status = "pending"
         failure = ""
         resolved = ""
@@ -401,12 +454,18 @@ def download_hydrosheds_full(all_products: bool = False) -> pd.DataFrame:
                 status = "already_present"
                 sha = sha256_file(local_zip)
                 size = local_zip.stat().st_size
+                expected_size = _head_size(url)
             else:
-                size = _head_size(url)
-                status, failure = _download_file(url, local_zip)
+                expected_size = _head_size(url)
+                size = expected_size
+                status, failure = _download_file(url, local_zip, expected_size=expected_size)
                 if status == "downloaded":
                     sha = sha256_file(local_zip)
                     size = local_zip.stat().st_size
+            if str(expected_size).isdigit() and local_zip.exists():
+                size_check_status = "ok" if int(local_zip.stat().st_size) == int(expected_size) else "size_mismatch"
+                if size_check_status == "size_mismatch":
+                    failure = (failure + " " if failure else "") + f"Local size {local_zip.stat().st_size} differs from expected {expected_size}."
             if status in {"downloaded", "already_present"}:
                 resolved = url
                 append_manifest(
@@ -421,23 +480,27 @@ def download_hydrosheds_full(all_products: bool = False) -> pd.DataFrame:
                         status="downloaded" if status == "downloaded" else "already_present",
                     )
                 )
-                try:
-                    if unpacked.exists() and any(unpacked.rglob("*")):
-                        unpack_status = "already_unpacked"
-                    elif zipfile.is_zipfile(local_zip):
-                        _safe_extract(local_zip, unpacked)
-                        unpack_status = "unpacked"
+                successful_source_ids.add(product.source_id)
+                if _should_unpack(product, config):
+                    try:
+                        if unpacked.exists() and any(unpacked.rglob("*")):
+                            unpack_status = "already_unpacked"
+                        elif zipfile.is_zipfile(local_zip):
+                            _safe_extract(local_zip, unpacked)
+                            unpack_status = "unpacked"
+                        else:
+                            unpack_status = "not_zip_or_unreadable"
+                            failure = "Downloaded file is not a readable zip archive."
+                    except Exception as exc:
+                        unpack_status = "unpack_failed"
+                        failure = str(exc)
+                        status = "partial"
+                    if unpack_status in {"unpacked", "already_unpacked"}:
+                        status = status if status == "already_present" else "downloaded"
                     else:
-                        unpack_status = "not_zip_or_unreadable"
-                        failure = "Downloaded file is not a readable zip archive."
-                except Exception as exc:
-                    unpack_status = "unpack_failed"
-                    failure = str(exc)
-                    status = "partial"
-                if unpack_status in {"unpacked", "already_unpacked"}:
-                    status = status if status == "already_present" else "downloaded"
+                        status = status if status == "partial" else unpack_status
                 else:
-                    status = status if status == "partial" else unpack_status
+                    unpack_status = "not_unpacked_by_policy"
             else:
                 append_manifest(
                     manifest_failure(
@@ -466,8 +529,10 @@ def download_hydrosheds_full(all_products: bool = False) -> pd.DataFrame:
                 "resolved_url": resolved or url,
                 "local_zip_path": relpath(local_zip),
                 "unpacked_path": relpath(unpacked) if unpacked.exists() else "",
+                "expected_file_size_bytes": expected_size,
                 "file_size_bytes": size,
                 "sha256": sha,
+                "size_check_status": size_check_status,
                 "download_status": status,
                 "failure_reason": failure,
                 "license_or_citation": HYDROSHEDS_LICENSE,
@@ -477,6 +542,8 @@ def download_hydrosheds_full(all_products: bool = False) -> pd.DataFrame:
 
     frame = pd.DataFrame(rows)
     _write_csv(frame, TABLE_DIR / "hydrosheds_full_download_inventory.csv")
+    _write_csv(frame[["source_id", "product_name", "download_status", "expected_file_size_bytes", "file_size_bytes", "size_check_status", "failure_reason"]], TABLE_DIR / "hydrosheds_full_download_status.csv")
+    _mark_superseded_manifest_failures(successful_source_ids)
     free_after = _disk_free_gb(download_root)
     downloaded = frame[frame["download_status"].isin(["downloaded", "already_present"])]
     total_bytes = pd.to_numeric(downloaded["file_size_bytes"], errors="coerce").fillna(0).sum()

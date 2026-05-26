@@ -15,7 +15,15 @@ download_products:
   basinatlas_global_gdb: true
   riveratlas_global_gdb: true
   lakeatlas_global_gdb: true
-  shapefile_fallbacks: false
+  shapefile_fallbacks: true
+  hydroatlas_documentation: true
+
+unpack_policy:
+  hydrobasins: true
+  hydrorivers: true
+  hydroatlas_gdb: true
+  hydroatlas_shapefile_fallbacks: false
+  documentation: false
 
 disk_safety:
   min_free_space_gb: 80
@@ -26,4 +34,14 @@ official_pages:
   hydrorivers: https://www.hydrosheds.org/products/hydrorivers
   hydroatlas: https://www.hydrosheds.org/hydroatlas
 
-manual_download_urls: {}
+manual_download_urls:
+  basinatlas_global_gdb: https://ndownloader.figshare.com/files/20082137
+  basinatlas_global_shp_fallback: https://ndownloader.figshare.com/files/20087237
+  riveratlas_global_gdb: https://ndownloader.figshare.com/files/20087321
+  riveratlas_global_shp_fallback: https://ndownloader.figshare.com/files/20087486
+  lakeatlas_global_gdb: https://ndownloader.figshare.com/files/35959544
+  lakeatlas_global_shp_fallback: https://ndownloader.figshare.com/files/35959547
+  hydroatlas_technical_documentation: https://data.hydrosheds.org/file/technical-documentation/HydroATLAS_TechDoc_v10_1.pdf
+  basinatlas_catalog_pdf: https://data.hydrosheds.org/file/technical-documentation/BasinATLAS_Catalog_v10.pdf
+  riveratlas_catalog_pdf: https://data.hydrosheds.org/file/technical-documentation/RiverATLAS_Catalog_v10.pdf
+  lakeatlas_catalog_pdf: https://data.hydrosheds.org/file/technical-documentation/LakeATLAS_Catalog_v10.pdf

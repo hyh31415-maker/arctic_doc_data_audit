@@ -33,6 +33,17 @@ def test_full_hydrosheds_download_inventory_exists() -> None:
     assert {"hydrobasins_standard_full", "hydrorivers_global", "basinatlas_global_gdb", "riveratlas_global_gdb"}.issubset(set(inventory["source_id"].astype(str)))
 
 
+def test_hydroatlas_uses_stable_ndownloader_urls() -> None:
+    inventory = _read(TABLE_DIR / "hydrosheds_full_download_inventory.csv")
+    hydroatlas = inventory[inventory["source_id"].astype(str).str.contains("atlas", case=False, na=False)]
+    assert not hydroatlas.empty
+    urls = " ".join(hydroatlas["download_url"].astype(str))
+    assert "figshare.com/ndownloader" not in urls
+    required = hydroatlas[hydroatlas["source_id"].astype(str).isin(["basinatlas_global_gdb", "riveratlas_global_gdb", "lakeatlas_global_gdb"])]
+    assert required["download_url"].astype(str).str.startswith("https://ndownloader.figshare.com/files/").all()
+    assert required["size_check_status"].astype(str).eq("ok").all()
+
+
 def test_hydrobasins_all_or_selected_levels_are_indexed_when_downloaded() -> None:
     inventory = _read(TABLE_DIR / "hydrosheds_full_download_inventory.csv")
     downloaded = inventory[

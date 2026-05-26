@@ -1,17 +1,17 @@
 # Data Freeze Report
 
 freeze_id: `data_freeze_20260526_v3`
-generated_at: `2026-05-26T11:41:35Z`
-git_commit: `9c54d11ef9bf1a1e1dca70611161bd1594d34d7f`
+generated_at: `2026-05-26T19:23:29Z`
+git_commit: `bdee3d26bbeb74fa4a4ae26385ffe0bad02ead1d`
 
 No DOC model was trained. No DOC prediction or flux product was generated.
 
 ## Freeze Readiness
 - READY_FOR_BASELINE_TRAINING: `True`
 - READY_FOR_CORE_FULL_TRAINING: `True`
-- READY_FOR_PUBLICATION_GRADE_TRAINING: `False`
+- READY_FOR_PUBLICATION_GRADE_TRAINING: `True`
 - READY_FOR_FULL_TRAINING: `True`
-- frozen_data_training_status: `ready_for_core_full_not_publication_grade`
+- frozen_data_training_status: `ready_for_publication_grade_training`
 
 ## Source Status Summary
 | source_id                                      | download_status   |   records |
@@ -28,7 +28,10 @@ No DOC model was trained. No DOC prediction or flux product was generated.
 | arcticgro_water_quality_flags                  | manual_required   |         1 |
 | arcticgro_water_quality_metadata               | downloaded        |         1 |
 | arcticgro_water_quality_parameter_descriptions | downloaded        |         1 |
-| basinatlas_global_gdb                          | failed            |         1 |
+| basinatlas_catalog_pdf                         | already_present   |         1 |
+| basinatlas_global_gdb                          | already_present   |         1 |
+| basinatlas_global_gdb                          | superseded_failed |         1 |
+| basinatlas_global_shp_fallback                 | already_present   |         1 |
 | datastream_mackenzie_candidate                 | dry_run           |         1 |
 | datastream_mackenzie_candidate                 | failed            |         1 |
 | gee_era5_land                                  | downloaded        |       156 |
@@ -48,17 +51,30 @@ No DOC model was trained. No DOC prediction or flux product was generated.
 | gee_smap_context_optional                      | failed            |        66 |
 | gee_smap_context_optional                      | report_only       |         1 |
 | hydroatlas                                     | dry_run           |         1 |
+| hydroatlas_technical_documentation             | already_present   |         1 |
 | hydrobasins                                    | dry_run           |         1 |
-| hydrobasins_custom_lakes_full                  | downloaded        |         9 |
-| hydrobasins_pour_points_full                   | downloaded        |         1 |
-| hydrobasins_standard_full                      | downloaded        |         9 |
-| hydrorivers_global                             | downloaded        |        10 |
-| lakeatlas_global_gdb                           | failed            |         1 |
+| hydrobasins_custom_lakes_full                  | already_present   |         9 |
+| hydrobasins_custom_lakes_full                  | superseded_failed |         9 |
+| hydrobasins_pour_points_full                   | already_present   |         1 |
+| hydrobasins_pour_points_full                   | superseded_failed |         1 |
+| hydrobasins_standard_full                      | already_present   |         9 |
+| hydrobasins_standard_full                      | superseded_failed |         9 |
+| hydrorivers_global                             | already_present   |        10 |
+| hydrorivers_global                             | superseded_failed |        10 |
+| hydrorivers_global_fallback_shapefile          | downloaded        |         1 |
+| hydrorivers_global_fallback_shapefile          | superseded_failed |         1 |
+| lakeatlas_catalog_pdf                          | already_present   |         1 |
+| lakeatlas_global_gdb                           | already_present   |         1 |
+| lakeatlas_global_gdb                           | superseded_failed |         1 |
+| lakeatlas_global_shp_fallback                  | already_present   |         1 |
 | old_arctic_doc_snowmelt_outputs                | downloaded        |         4 |
 | old_arctic_doc_snowmelt_untrained_data         | downloaded        |       166 |
 | partners_mdpi_eurasian_candidate               | dry_run           |         1 |
 | partners_mdpi_eurasian_candidate               | failed            |         2 |
-| riveratlas_global_gdb                          | failed            |         1 |
+| riveratlas_catalog_pdf                         | already_present   |         1 |
+| riveratlas_global_gdb                          | already_present   |         1 |
+| riveratlas_global_gdb                          | superseded_failed |         1 |
+| riveratlas_global_shp_fallback                 | already_present   |         1 |
 | wqp_usgs_yukon_candidate                       | downloaded        |        32 |
 | wqp_usgs_yukon_candidate                       | dry_run           |         1 |
 | wqp_usgs_yukon_candidate                       | failed            |         8 |
@@ -67,7 +83,7 @@ No DOC model was trained. No DOC prediction or flux product was generated.
 | table_name                        | local_path                                           |   row_count | sha256                                                           |
 |:----------------------------------|:-----------------------------------------------------|------------:|:-----------------------------------------------------------------|
 | auxiliary_context_canonical       | data/processed/auxiliary_context_canonical.csv       |       86324 | 83141d2dded2b002f133ed95b65b6b14680e90ae4b6a2fa33dc2c0d821561f7b |
-| basin_context_canonical           | data/processed/basin_context_canonical.csv           |           6 | ae97c2fd30560a26ed419470403616abf6fc60b7e9f2bff2f2735286d6bc753b |
+| basin_context_canonical           | data/processed/basin_context_canonical.csv           |           6 | 9418e0cd2e7ba4aca6024643fe0445439cdf87b6e041fc322c0674a0ea8edcec |
 | daily_discharge_canonical         | data/processed/daily_discharge_canonical.csv         |      154370 | 7dfa107c52f636dcb6d28d38d107b5d0b4226d471554103cf5b9e893a2965cdb |
 | daily_hydroclimate_canonical      | data/processed/daily_hydroclimate_canonical.csv      |      138432 | e01c47c23dbc9ae600ee441c13294ed702e89a7b263556779e68a33ba597c1a4 |
 | doc_labels_canonical              | data/processed/doc_labels_canonical.csv              |         595 | ece38cb8238b21223b72d903da19dc5a01553b32ad50f6ace9a9c56166497657 |
@@ -80,9 +96,9 @@ No DOC model was trained. No DOC prediction or flux product was generated.
 ## Candidate Source Completion
 - candidate_label_audit_completed: `True`
 - gee_extraction_readiness_completed: `True`
-- basin_context_status: `upstream_basin_complete_attributes_missing`
+- basin_context_status: `upstream_basin_complete_attributes_partial`
 - basin_context_accepted_for_core_full_training: `True`
-- basin_context_accepted_for_publication_grade_training: `False`
+- basin_context_accepted_for_publication_grade_training: `True`
 - datastream_final_status_ok: `True`
 - mdpi_final_status_ok: `True`
 - wqp_final_status_ok: `True`
@@ -136,13 +152,13 @@ No DOC model was trained. No DOC prediction or flux product was generated.
 
 ## Test Status
 - tests_passed: `True`
-- test_summary: `69 passed, 19 warnings in 45.41s`
+- test_summary: `70 passed, 19 warnings in 47.07s`
 
 ## Unresolved Core Blockers
 _No critical core blockers._
 
 ## Unresolved Publication-Grade Blockers
-- Basin context status is upstream_basin_complete_attributes_missing, not real HydroBASINS/HydroATLAS upstream context.
+_No publication-grade blockers._
 
 ## Explicit Statement
-Frozen data are ready for core full-training data handoff under the documented v3 rules, but not publication-grade training because exact upstream HydroBASINS/HydroATLAS context is not complete. No model has been trained by this repository.
+Frozen data are ready for publication-grade training data handoff under the documented v3 rules. No model has been trained by this repository.

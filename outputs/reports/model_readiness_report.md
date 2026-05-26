@@ -26,9 +26,9 @@ This is a training-readiness audit only. No DOC model was trained.
 | Grouped validation               | leave-one-year-out: >=5 years with >=5 usable labels; leave-one-river-out: >=3 rivers with >=10 usable labels      | 20 eligible years; 6 eligible rivers                                        | required_and_feasible | Use grouped validation because repeated dates, rivers, and legacy sources are not independent random samples.         |
 
 ## Readiness Semantics
-| READY_FOR_BASELINE_TRAINING   | READY_FOR_CORE_FULL_TRAINING   | READY_FOR_PUBLICATION_GRADE_TRAINING   | basin_context_status                       | notes                                                                                             |
-|:------------------------------|:-------------------------------|:---------------------------------------|:-------------------------------------------|:--------------------------------------------------------------------------------------------------|
-| True                          | True                           | False                                  | upstream_basin_complete_attributes_missing | Core readiness assumes models do not require exact basin-level HydroBASINS/HydroATLAS attributes. |
+| READY_FOR_BASELINE_TRAINING   | READY_FOR_CORE_FULL_TRAINING   | READY_FOR_PUBLICATION_GRADE_TRAINING   | basin_context_status                       | notes                                |
+|:------------------------------|:-------------------------------|:---------------------------------------|:-------------------------------------------|:-------------------------------------|
+| True                          | True                           | True                                   | upstream_basin_complete_attributes_partial | Publication-grade context available. |
 
 ## River Coverage
 | river     |   total_doc_labels |   usable_doc_labels |   year_min |   year_max |   n_years |   labels_with_Q_m3s |   labels_with_hydroclimate_predictors |   labels_with_Q_and_hydroclimate_predictors |   missing_Q_m3s_rate |   missing_temperature_2m_C_rate |   missing_positive_degree_day_Cday_rate |   missing_snow_cover_fraction_rate |   missing_snow_depletion_rate_7d_rate |   missing_surface_runoff_m_rate |   hls_match_0d |   hls_match_1d |   hls_match_3d |   hls_match_7d |   sentinel2_match_0d |   sentinel2_match_1d |   sentinel2_match_3d |   sentinel2_match_7d |   any_optical_match_0d |   any_optical_match_1d |   any_optical_match_3d |   any_optical_match_7d |   roi_count |   manual_review_required_count | roi_risk_summary   |

@@ -1,6 +1,6 @@
 # Upstream Basin Aggregation Report
 
-Generated: 2026-05-26T11:32:58Z
+Generated: 2026-05-26T19:11:00Z
 
 No DOC model was trained. No DOC prediction or flux product was generated.
 

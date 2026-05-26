@@ -57,5 +57,11 @@ def run() -> pd.DataFrame:
                     "notes": "ROI path requires geometry QA before GEE extraction.",
                 }
             )
-    write_table(ensure_columns(pd.DataFrame(roi_rows), "roi_catalog"), "roi_catalog", PROCESSED_DIR / "roi_catalog.csv")
+    roi_path = PROCESSED_DIR / "roi_catalog.csv"
+    if roi_path.exists():
+        existing = pd.read_csv(roi_path)
+        if not existing.empty and "source_id" in existing.columns and existing["source_id"].astype(str).str.contains("old_arctic_doc_snowmelt_untrained_data", na=False).any():
+            write_table(ensure_columns(existing, "roi_catalog"), "roi_catalog", roi_path)
+            return frame
+    write_table(ensure_columns(pd.DataFrame(roi_rows), "roi_catalog"), "roi_catalog", roi_path)
     return frame

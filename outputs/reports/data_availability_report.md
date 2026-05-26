@@ -212,38 +212,266 @@ This report audits data acquisition and preprocessing readiness only. No DOC mod
 | Yukon     | 1975-01-01   | 2025-10-06  |    18542 |          16626 |
 
 ## 7. Hydroclimate Daily Coverage
-_No rows._
+| river     | first_date   | last_date   |   n_days |   n_nonmissing |
+|:----------|:-------------|:------------|---------:|---------------:|
+| Kolyma    | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Lena      | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Mackenzie | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Ob        | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Yenisey   | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Yukon     | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
 
 ## 8. Optical Proxy Coverage by Sensor
-_No rows._
+| river     | sensor   |   optical_rows |
+|:----------|:---------|---------------:|
+| Kolyma    | HLS      |           7347 |
+| Lena      | HLS      |           7380 |
+| Mackenzie | HLS      |           7436 |
+| Ob        | HLS      |           8164 |
+| Yenisey   | HLS      |           8886 |
+| Yukon     | HLS      |           7854 |
 
 ## 9. Optical Matched DOC Sample Count
 | river     |   window_days |   matched_doc_samples |
 |:----------|--------------:|----------------------:|
-| Ob        |             0 |                     0 |
-| Ob        |             1 |                     0 |
-| Ob        |             3 |                     0 |
-| Ob        |             7 |                     0 |
-| Yenisey   |             0 |                     0 |
-| Yenisey   |             1 |                     0 |
-| Yenisey   |             3 |                     0 |
-| Yenisey   |             7 |                     0 |
-| Lena      |             0 |                     0 |
-| Lena      |             1 |                     0 |
-| Lena      |             3 |                     0 |
-| Lena      |             7 |                     0 |
-| Kolyma    |             0 |                     0 |
-| Kolyma    |             1 |                     0 |
-| Kolyma    |             3 |                     0 |
-| Kolyma    |             7 |                     0 |
-| Yukon     |             0 |                     0 |
-| Yukon     |             1 |                     0 |
-| Yukon     |             3 |                     0 |
-| Yukon     |             7 |                     0 |
-| Mackenzie |             0 |                     0 |
-| Mackenzie |             1 |                     0 |
-| Mackenzie |             3 |                     0 |
-| Mackenzie |             7 |                     0 |
+| Ob        |             0 |                    18 |
+| Ob        |             1 |                    20 |
+| Ob        |             3 |                    21 |
+| Ob        |             7 |                    22 |
+| Yenisey   |             0 |                    15 |
+| Yenisey   |             1 |                    23 |
+| Yenisey   |             3 |                    23 |
+| Yenisey   |             7 |                    23 |
+| Lena      |             0 |                    15 |
+| Lena      |             1 |                    18 |
+| Lena      |             3 |                    18 |
+| Lena      |             7 |                    18 |
+| Kolyma    |             0 |                    19 |
+| Kolyma    |             1 |                    22 |
+| Kolyma    |             3 |                    23 |
+| Kolyma    |             7 |                    24 |
+| Yukon     |             0 |                    20 |
+| Yukon     |             1 |                    26 |
+| Yukon     |             3 |                    28 |
+| Yukon     |             7 |                    29 |
+| Mackenzie |             0 |                    20 |
+| Mackenzie |             1 |                    23 |
+| Mackenzie |             3 |                    24 |
+| Mackenzie |             7 |                    25 |
+
+## Old Project Snapshot Breakdown
+| old_project_subdir   |   file_count |
+|:---------------------|-------------:|
+| data/interim         |          151 |
+| data/raw             |           13 |
+| data/raw_external    |            2 |
+| total                |          166 |
+
+## Old Snapshot Promotable Files
+| product_family   | target_canonical_table       |   file_count |
+|:-----------------|:-----------------------------|-------------:|
+| auxiliary        | auxiliary_context_canonical  |            2 |
+| era5             | daily_hydroclimate_canonical |           14 |
+| hls              | optical_timeseries_canonical |           15 |
+| hydroclimate     | daily_hydroclimate_canonical |            7 |
+| modis            | daily_hydroclimate_canonical |           14 |
+| roi              | roi_catalog                  |           39 |
+| smap             | auxiliary_context_canonical  |            7 |
+
+## Old Snapshot Promotion Summary
+| target_canonical_table       | source_id                              |   promoted_rows |
+|:-----------------------------|:---------------------------------------|----------------:|
+| roi_catalog                  | old_arctic_doc_snowmelt_untrained_data |              39 |
+| daily_hydroclimate_canonical | old_arctic_doc_snowmelt_untrained_data |           25200 |
+| optical_timeseries_canonical | old_arctic_doc_snowmelt_untrained_data |           47067 |
+| auxiliary_context_canonical  | old_arctic_doc_snowmelt_untrained_data |           86324 |
+
+## Old Snapshot Raw Duplicate/Conflict Summary
+| decision                      |   file_count |
+|:------------------------------|-------------:|
+| duplicate_of_official_current |            7 |
+| old_only_candidate            |            8 |
+
+## Old Snapshot ROI Promotion Summary
+| river     | roi_set                 |   roi_count |
+|:----------|:------------------------|------------:|
+| Kolyma    | auto_jrc_center_channel |           1 |
+| Kolyma    | final_primary           |           1 |
+| Kolyma    | final_relaxed           |           1 |
+| Kolyma    | final_strict            |           1 |
+| Kolyma    | initial_buffer          |           1 |
+| Kolyma    | station_point           |           1 |
+| Lena      | auto_jrc_center_channel |           1 |
+| Lena      | final_primary           |           1 |
+| Lena      | final_relaxed           |           1 |
+| Lena      | final_strict            |           1 |
+| Lena      | initial_buffer          |           1 |
+| Lena      | station_point           |           1 |
+| Mackenzie | auto_jrc_center_channel |           2 |
+| Mackenzie | final_primary           |           1 |
+| Mackenzie | final_relaxed           |           1 |
+| Mackenzie | final_strict            |           1 |
+| Mackenzie | initial_buffer          |           2 |
+| Mackenzie | station_point           |           2 |
+| Ob        | auto_jrc_center_channel |           1 |
+| Ob        | final_primary           |           1 |
+| Ob        | final_relaxed           |           1 |
+| Ob        | final_strict            |           1 |
+| Ob        | initial_buffer          |           1 |
+| Ob        | station_point           |           1 |
+| Yenisey   | auto_jrc_center_channel |           1 |
+| Yenisey   | final_primary           |           1 |
+| Yenisey   | final_relaxed           |           1 |
+| Yenisey   | final_strict            |           1 |
+| Yenisey   | initial_buffer          |           1 |
+| Yenisey   | station_point           |           1 |
+| Yukon     | auto_jrc_center_channel |           1 |
+| Yukon     | final_primary           |           1 |
+| Yukon     | final_relaxed           |           1 |
+| Yukon     | final_strict            |           1 |
+| Yukon     | initial_buffer          |           1 |
+| Yukon     | station_point           |           1 |
+
+## Old Snapshot Hydroclimate Promotion Summary
+| river     | first_date   | last_date   |   n_days |   n_nonmissing |
+|:----------|:-------------|:------------|---------:|---------------:|
+| Kolyma    | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Lena      | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Mackenzie | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Ob        | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Yenisey   | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+| Yukon     | 2000-05-01   | 2024-10-15  |     4200 |           4200 |
+
+## Old Snapshot Optical Promotion Summary
+| river     | sensor   |   optical_rows |
+|:----------|:---------|---------------:|
+| Kolyma    | HLS      |           7347 |
+| Lena      | HLS      |           7380 |
+| Mackenzie | HLS      |           7436 |
+| Ob        | HLS      |           8164 |
+| Yenisey   | HLS      |           8886 |
+| Yukon     | HLS      |           7854 |
+
+## Canonical Tables Source Composition
+| canonical_table              | source_id                              |   rows |
+|:-----------------------------|:---------------------------------------|-------:|
+| doc_labels_canonical         | arcticgro_water_quality_current        |    595 |
+| doc_labels_canonical         | old_arctic_doc_snowmelt_untrained_data |      0 |
+| daily_hydroclimate_canonical | old_arctic_doc_snowmelt_untrained_data |  25200 |
+| optical_timeseries_canonical | old_arctic_doc_snowmelt_untrained_data |  47067 |
+| roi_catalog                  | old_arctic_doc_snowmelt_untrained_data |     39 |
+| auxiliary_context_canonical  | old_arctic_doc_snowmelt_untrained_data |  86324 |
+
+## Remaining Snapshot Files Not Promoted
+| snapshot_path                                                                                                           | inferred_product_family   | not_promoted_reason                                                             |
+|:------------------------------------------------------------------------------------------------------------------------|:--------------------------|:--------------------------------------------------------------------------------|
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/arcticgro_discharge_page.html                                 | raw_arcticgro             | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/arcticgro_input_template.csv                                  | raw_arcticgro             | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/arcticgro_parameter_description_20250402.csv                  | raw_arcticgro             | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/arcticgro_water_quality_20250402.csv                          | raw_arcticgro             | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/arcticgro_water_quality_20250402.xlsx                         | raw_arcticgro             | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/Kolyma_Kolymskoe_Version_20260210.xlsx                        | discharge                 | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/Kolyma_Srednekolymsk_Version_20260210.xlsx                    | discharge                 | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/Lena_Kyusyur_Version_20260210.xlsx                            | discharge                 | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/Mackenzie_ArcticRedRiver_Version_20260210.xlsx                | discharge                 | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/Ob_Salekhard_Version_20260210.xlsx                            | discharge                 | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/README_DOWNLOAD_ARCTICGRO.md                                  | raw_arcticgro             | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/Yenisei_Igarka_Version_20260210.xlsx                          | discharge                 | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw/arcticgro/Yukon_PilotStation_Version_20260210.xlsx                      | discharge                 | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw_external/arcticgro/absorbance/arcticgro_absorbance_20260520_212754.xlsx | raw_external_arcticgro    | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/raw_external/arcticgro/water_quality/arcticgro_water_quality_20250402.csv   | raw_external_arcticgro    | raw files require duplicate/conflict comparison, not direct canonical promotion |
+| data/raw_external/old_project_snapshot/data/interim/auto_roi_qc_metrics.csv                                             | qc                        | QC file is used as sidecar evidence                                             |
+| data/raw_external/old_project_snapshot/data/interim/by_river/kolyma/auto_roi_qc_metrics.csv                             | qc                        | QC file is used as sidecar evidence                                             |
+| data/raw_external/old_project_snapshot/data/interim/by_river/kolyma/main_channel_corridor.geojson                       | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/kolyma/roi_candidates_core.geojson                         | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/kolyma/roi_candidates_exploratory.geojson                  | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/kolyma/roi_candidates_relaxed.geojson                      | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/kolyma/roi_core_constrained.geojson                        | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/kolyma/roi_relaxed_constrained.geojson                     | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/auto_roi_qc_metrics.csv                               | qc                        | QC file is used as sidecar evidence                                             |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/core_rescue.geojson                                   | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/main_channel_corridor.geojson                         | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/relaxed_rescue.geojson                                | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/roi_candidates_core.geojson                           | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/roi_candidates_exploratory.geojson                    | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/roi_candidates_relaxed.geojson                        | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/roi_core_constrained.geojson                          | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/roi_relaxed_constrained.geojson                       | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/sentinel2_reflectance_final_primary.csv               | optical                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/mackenzie/auto_roi_qc_metrics.csv                          | qc                        | QC file is used as sidecar evidence                                             |
+| data/raw_external/old_project_snapshot/data/interim/by_river/mackenzie/main_channel_corridor.geojson                    | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/mackenzie/roi_candidates_core.geojson                      | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/mackenzie/roi_candidates_exploratory.geojson               | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/mackenzie/roi_candidates_relaxed.geojson                   | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/mackenzie/roi_core_constrained.geojson                     | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/mackenzie/roi_relaxed_constrained.geojson                  | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/auto_roi_qc_metrics.csv                                 | qc                        | QC file is used as sidecar evidence                                             |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/core_rescue.geojson                                     | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/main_channel_corridor.geojson                           | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/main_channel_corridor_snap_rescue.geojson               | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/roi_candidates_core.geojson                             | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/roi_candidates_exploratory.geojson                      | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/roi_candidates_relaxed.geojson                          | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/roi_core_constrained.geojson                            | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/roi_relaxed_constrained.geojson                         | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/sentinel2_reflectance_final_primary.csv                 | optical                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/trimmed_core.geojson                                    | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/auto_roi_qc_metrics.csv                            | qc                        | QC file is used as sidecar evidence                                             |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/core_rescue.geojson                                | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/main_channel_corridor.geojson                      | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/relaxed_rescue.geojson                             | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/roi_candidates_core.geojson                        | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/roi_candidates_exploratory.geojson                 | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/roi_candidates_relaxed.geojson                     | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/roi_core_constrained.geojson                       | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/roi_relaxed_constrained.geojson                    | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/sentinel2_reflectance_final_primary.csv            | optical                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yukon/auto_roi_qc_metrics.csv                              | qc                        | QC file is used as sidecar evidence                                             |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yukon/main_channel_corridor.geojson                        | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yukon/roi_candidates_core.geojson                          | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yukon/roi_candidates_exploratory.geojson                   | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yukon/roi_candidates_relaxed.geojson                       | roi                       | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yukon/roi_core_constrained.geojson                         | unknown                   | no supported canonical target                                                   |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yukon/roi_relaxed_constrained.geojson                      | unknown                   | no supported canonical target                                                   |
+
+## Old Snapshot Hydroclimate Unmapped Columns
+| snapshot_path                                                                                                               | original_relative_path                                                               | inferred_product_family   | unmapped_columns_json                                           | notes                                                 |
+|:----------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------|:--------------------------|:----------------------------------------------------------------|:------------------------------------------------------|
+| data/raw_external/old_project_snapshot/data/interim/by_river/kolyma/modis_snow_daily.csv                                    | data/interim/by_river/kolyma/modis_snow_daily.csv                                    | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/modis_snow_daily.csv                                      | data/interim/by_river/lena/modis_snow_daily.csv                                      | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/mackenzie/modis_snow_daily.csv                                 | data/interim/by_river/mackenzie/modis_snow_daily.csv                                 | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/modis_snow_daily.csv                                        | data/interim/by_river/ob/modis_snow_daily.csv                                        | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/modis_snow_daily.csv                                   | data/interim/by_river/yenisey/modis_snow_daily.csv                                   | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yukon/modis_snow_daily.csv                                     | data/interim/by_river/yukon/modis_snow_daily.csv                                     | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/kolyma/modis_snow_daily_2000_2024.csv    | data/interim/longterm_hydroclimate/by_river/kolyma/modis_snow_daily_2000_2024.csv    | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/lena/modis_snow_daily_2000_2024.csv      | data/interim/longterm_hydroclimate/by_river/lena/modis_snow_daily_2000_2024.csv      | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/mackenzie/modis_snow_daily_2000_2024.csv | data/interim/longterm_hydroclimate/by_river/mackenzie/modis_snow_daily_2000_2024.csv | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/ob/modis_snow_daily_2000_2024.csv        | data/interim/longterm_hydroclimate/by_river/ob/modis_snow_daily_2000_2024.csv        | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/yenisey/modis_snow_daily_2000_2024.csv   | data/interim/longterm_hydroclimate/by_river/yenisey/modis_snow_daily_2000_2024.csv   | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/yukon/modis_snow_daily_2000_2024.csv     | data/interim/longterm_hydroclimate/by_river/yukon/modis_snow_daily_2000_2024.csv     | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/modis_snow_daily.csv                                                    | data/interim/modis_snow_daily.csv                                                    | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/modis_snow_daily_template.csv                                           | data/interim/modis_snow_daily_template.csv                                           | modis                     | ["mean_ndsi_snow_cover", "valid_modis_pixels"]                  | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/kolyma/era5_land_daily.csv                                     | data/interim/by_river/kolyma/era5_land_daily.csv                                     | era5                      | ["temp2m_mean_K"]                                               | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/era5_land_daily.csv                                       | data/interim/by_river/lena/era5_land_daily.csv                                       | era5                      | ["temp2m_mean_K"]                                               | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/mackenzie/era5_land_daily.csv                                  | data/interim/by_river/mackenzie/era5_land_daily.csv                                  | era5                      | ["temp2m_mean_K"]                                               | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/era5_land_daily.csv                                         | data/interim/by_river/ob/era5_land_daily.csv                                         | era5                      | ["temp2m_mean_K"]                                               | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/era5_land_daily.csv                                    | data/interim/by_river/yenisey/era5_land_daily.csv                                    | era5                      | ["temp2m_mean_K"]                                               | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yukon/era5_land_daily.csv                                      | data/interim/by_river/yukon/era5_land_daily.csv                                      | era5                      | ["temp2m_mean_K"]                                               | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/era5_land_daily.csv                                                     | data/interim/era5_land_daily.csv                                                     | era5                      | ["temp2m_mean_K"]                                               | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/era5_land_daily_template.csv                                            | data/interim/era5_land_daily_template.csv                                            | era5                      | ["temp2m_mean_K"]                                               | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/kolyma/era5_land_daily_2000_2024.csv     | data/interim/longterm_hydroclimate/by_river/kolyma/era5_land_daily_2000_2024.csv     | era5                      | ["temp2m_mean_K", "snowmelt_total_m"]                           | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/lena/era5_land_daily_2000_2024.csv       | data/interim/longterm_hydroclimate/by_river/lena/era5_land_daily_2000_2024.csv       | era5                      | ["temp2m_mean_K", "snowmelt_total_m"]                           | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/mackenzie/era5_land_daily_2000_2024.csv  | data/interim/longterm_hydroclimate/by_river/mackenzie/era5_land_daily_2000_2024.csv  | era5                      | ["temp2m_mean_K", "snowmelt_total_m"]                           | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/ob/era5_land_daily_2000_2024.csv         | data/interim/longterm_hydroclimate/by_river/ob/era5_land_daily_2000_2024.csv         | era5                      | ["temp2m_mean_K", "snowmelt_total_m"]                           | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/yenisey/era5_land_daily_2000_2024.csv    | data/interim/longterm_hydroclimate/by_river/yenisey/era5_land_daily_2000_2024.csv    | era5                      | ["temp2m_mean_K", "snowmelt_total_m"]                           | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/longterm_hydroclimate/by_river/yukon/era5_land_daily_2000_2024.csv      | data/interim/longterm_hydroclimate/by_river/yukon/era5_land_daily_2000_2024.csv      | era5                      | ["temp2m_mean_K", "snowmelt_total_m"]                           | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/kolyma/daily_hydroclimate_features.csv                         | data/interim/by_river/kolyma/daily_hydroclimate_features.csv                         | hydroclimate              | ["temp2m_mean_K", "mean_ndsi_snow_cover", "valid_modis_pixels"] | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/lena/daily_hydroclimate_features.csv                           | data/interim/by_river/lena/daily_hydroclimate_features.csv                           | hydroclimate              | ["temp2m_mean_K", "mean_ndsi_snow_cover", "valid_modis_pixels"] | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/mackenzie/daily_hydroclimate_features.csv                      | data/interim/by_river/mackenzie/daily_hydroclimate_features.csv                      | hydroclimate              | ["temp2m_mean_K", "mean_ndsi_snow_cover", "valid_modis_pixels"] | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/ob/daily_hydroclimate_features.csv                             | data/interim/by_river/ob/daily_hydroclimate_features.csv                             | hydroclimate              | ["temp2m_mean_K", "mean_ndsi_snow_cover", "valid_modis_pixels"] | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yenisey/daily_hydroclimate_features.csv                        | data/interim/by_river/yenisey/daily_hydroclimate_features.csv                        | hydroclimate              | ["temp2m_mean_K", "mean_ndsi_snow_cover", "valid_modis_pixels"] | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/by_river/yukon/daily_hydroclimate_features.csv                          | data/interim/by_river/yukon/daily_hydroclimate_features.csv                          | hydroclimate              | ["temp2m_mean_K", "mean_ndsi_snow_cover", "valid_modis_pixels"] | columns retained outside daily_hydroclimate_canonical |
+| data/raw_external/old_project_snapshot/data/interim/daily_hydroclimate_features.csv                                         | data/interim/daily_hydroclimate_features.csv                                         | hydroclimate              | ["temp2m_mean_K", "mean_ndsi_snow_cover", "valid_modis_pixels"] | columns retained outside daily_hydroclimate_canonical |
 
 ## 10. Duplicate Statistics and Rules
 Deduplication groups records by river, station, date, parameter, and sample id when available. Preference order is official ArcticGRO current, accepted/non-flagged records, explicit DOC, complete coordinates, and newest version.

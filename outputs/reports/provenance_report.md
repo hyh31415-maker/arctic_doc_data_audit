@@ -224,15 +224,29 @@ Every canonical table is expected to retain source_id, source file/sheet/row inf
 | arcticgro_discharge_current | 154370 |
 
 ### daily_hydroclimate_canonical
-_No rows._
+| source_id                              |   rows |
+|:---------------------------------------|-------:|
+| old_arctic_doc_snowmelt_untrained_data |  25200 |
 
 ### optical_timeseries_canonical
-_No rows._
+| source_id                              |   rows |
+|:---------------------------------------|-------:|
+| old_arctic_doc_snowmelt_untrained_data |  47067 |
 
 ### basin_context_canonical
 | source_id              |   rows |
 |:-----------------------|-------:|
 | hydrobasins;hydroatlas |      6 |
+
+### roi_catalog
+| source_id                              |   rows |
+|:---------------------------------------|-------:|
+| old_arctic_doc_snowmelt_untrained_data |     39 |
+
+### auxiliary_context_canonical
+| source_id                              |   rows |
+|:---------------------------------------|-------:|
+| old_arctic_doc_snowmelt_untrained_data |  86324 |
 
 ## Deduplication Preference
 DOC labels prefer official ArcticGRO current, accepted/non-flagged records, explicit DOC, complete station metadata, and newer dataset versions. Duplicate decisions are written to `outputs/tables/duplicate_decisions.csv`.
@@ -245,3 +259,45 @@ WQP/USGS Yukon, DataStream Mackenzie, PARTNERS/MDPI supplements, and Arctic Data
 
 ## Scientific Boundary
 Lab absorbance/CDOM supports mechanism validation only by default. Satellite reflectance remains optical proxy data, never DOC labels.
+
+## Old Snapshot Audit and Promotion
+Old snapshot files are audited from `old_arctic_doc_snowmelt_untrained_data`. Raw ArcticGRO files are compared to current official downloads and are not directly promoted. Legacy ROI, hydroclimate, HLS optical proxy, and auxiliary context rows are marked with legacy quality flags and snapshot provenance.
+
+### Old Snapshot Breakdown
+| old_project_subdir   |   file_count |
+|:---------------------|-------------:|
+| data/interim         |          151 |
+| data/raw             |           13 |
+| data/raw_external    |            2 |
+| total                |          166 |
+
+### Old Snapshot Promotion Summary
+| target_canonical_table       | source_id                              |   promoted_rows |
+|:-----------------------------|:---------------------------------------|----------------:|
+| roi_catalog                  | old_arctic_doc_snowmelt_untrained_data |              39 |
+| daily_hydroclimate_canonical | old_arctic_doc_snowmelt_untrained_data |           25200 |
+| optical_timeseries_canonical | old_arctic_doc_snowmelt_untrained_data |           47067 |
+| auxiliary_context_canonical  | old_arctic_doc_snowmelt_untrained_data |           86324 |
+
+### Old Snapshot Raw Decisions
+| decision                      |   file_count |
+|:------------------------------|-------------:|
+| duplicate_of_official_current |            7 |
+| old_only_candidate            |            8 |
+
+### Canonical Tables Source Composition
+| canonical_table              | source_id                              |   rows |
+|:-----------------------------|:---------------------------------------|-------:|
+| doc_labels_canonical         | arcticgro_water_quality_current        |    595 |
+| doc_labels_canonical         | old_arctic_doc_snowmelt_untrained_data |      0 |
+| lab_optical_proxy_canonical  | arcticgro_absorbance_current           |    442 |
+| lab_optical_proxy_canonical  | arcticgro_water_quality_current        |    440 |
+| lab_optical_proxy_canonical  | old_arctic_doc_snowmelt_untrained_data |      0 |
+| daily_discharge_canonical    | arcticgro_discharge_current            | 154370 |
+| daily_discharge_canonical    | old_arctic_doc_snowmelt_untrained_data |      0 |
+| daily_hydroclimate_canonical | old_arctic_doc_snowmelt_untrained_data |  25200 |
+| optical_timeseries_canonical | old_arctic_doc_snowmelt_untrained_data |  47067 |
+| basin_context_canonical      | hydrobasins;hydroatlas                 |      6 |
+| basin_context_canonical      | old_arctic_doc_snowmelt_untrained_data |      0 |
+| roi_catalog                  | old_arctic_doc_snowmelt_untrained_data |     39 |
+| auxiliary_context_canonical  | old_arctic_doc_snowmelt_untrained_data |  86324 |

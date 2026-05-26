@@ -93,6 +93,29 @@ python -m arctic_doc_data_audit.cli download --source old_project_raw
 
 This copies `data/raw`, `data/raw_external`, and `data/interim` into `data/raw_external/old_project_snapshot/`, records SHA256 rows in the manifest, and keeps the files out of git.
 
+## Old Snapshot Audit and Promotion
+
+The new project is the only main project. The old project directory is used only once to create a local snapshot; after that, future workflows should read this repository's canonical tables instead of old project code or paths.
+
+```powershell
+python -m arctic_doc_data_audit.cli download --source old_project_raw
+python -m arctic_doc_data_audit.cli audit-old-snapshot
+python -m arctic_doc_data_audit.cli promote-old-snapshot --all
+python -m arctic_doc_data_audit.cli preprocess --all
+python -m arctic_doc_data_audit.cli build-training-matrix
+python -m arctic_doc_data_audit.cli report
+```
+
+`audit-old-snapshot` writes:
+
+- `outputs/tables/old_snapshot_inventory.csv`
+- `outputs/tables/old_snapshot_raw_compare.csv`
+- `outputs/tables/discharge_candidate_station_inventory.csv`
+
+`promote-old-snapshot --all` can promote legacy ROI, hydroclimate, HLS optical proxy, and auxiliary context rows into canonical tables with `source_id=old_arctic_doc_snowmelt_untrained_data`. Old model, prediction, and flux outputs are excluded. Old raw ArcticGRO files are compared to current official downloads and are not directly merged.
+
+Legacy GEE/HLS/ERA5/MODIS rows are marked as legacy snapshot sources and can later be replaced by regenerated extraction from the new project.
+
 ## Future Training Inputs
 
 Future modeling code should read `doc_labels_canonical.csv`, `daily_discharge_canonical.csv`, `daily_hydroclimate_canonical.csv`, `optical_timeseries_canonical.csv`, and `basin_context_canonical.csv`. The prepared `training_matrix_daily_predictable.csv` intentionally excludes lab absorbance/CDOM columns and is only a future input table, not a model result.

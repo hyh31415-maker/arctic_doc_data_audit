@@ -31,6 +31,7 @@ def init_project() -> None:
         "roi_catalog",
         "optical_timeseries_canonical",
         "basin_context_canonical",
+        "auxiliary_context_canonical",
         "training_matrix_daily_predictable",
     ]:
         write_table(empty_table(table_name), table_name)
@@ -52,6 +53,24 @@ def build_training_matrix() -> None:
     from .preprocess import training_matrix
 
     training_matrix.run()
+
+
+def audit_old_snapshot() -> None:
+    from .preprocess import old_snapshot
+
+    old_snapshot.audit_old_snapshot()
+
+
+def promote_old_snapshot(args: argparse.Namespace) -> None:
+    from .preprocess import old_snapshot
+
+    if args.all:
+        families = ["raw_compare", "roi", "hydroclimate", "optical", "auxiliary"]
+    else:
+        families = [item.strip() for item in (args.families or "").split(",") if item.strip()]
+    if not families:
+        raise SystemExit("Specify --families roi,hydroclimate,optical,auxiliary,raw_compare or --all.")
+    old_snapshot.promote_old_snapshot(families)
 
 
 def run_download(args: argparse.Namespace) -> None:
@@ -98,6 +117,10 @@ def build_parser() -> argparse.ArgumentParser:
     preprocess.add_argument("--all", action="store_true", help="Run all preprocessors.")
 
     subparsers.add_parser("build-training-matrix", help="Build future daily-predictable training matrix without training a model.")
+    subparsers.add_parser("audit-old-snapshot", help="Audit old project snapshot files and generate inventory/raw-compare tables.")
+    promote = subparsers.add_parser("promote-old-snapshot", help="Promote audited old snapshot families into canonical tables.")
+    promote.add_argument("--families", default="", help="Comma-separated families: roi,hydroclimate,optical,auxiliary,raw_compare.")
+    promote.add_argument("--all", action="store_true", help="Promote all supported old snapshot families.")
     subparsers.add_parser("report", help="Generate data availability and provenance reports.")
     return parser
 
@@ -127,6 +150,15 @@ def main(argv: Iterable[str] | None = None) -> None:
         build_training_matrix()
         generate_reports()
         logger.info("Training matrix built without model training.")
+    elif args.command == "audit-old-snapshot":
+        audit_old_snapshot()
+        generate_reports()
+        logger.info("Old snapshot audit complete.")
+    elif args.command == "promote-old-snapshot":
+        promote_old_snapshot(args)
+        build_training_matrix()
+        generate_reports()
+        logger.info("Old snapshot promotion complete without model training.")
     elif args.command == "report":
         generate_reports()
         logger.info("Reports generated.")

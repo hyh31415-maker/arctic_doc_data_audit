@@ -12,13 +12,14 @@ tables:
   daily_discharge_canonical:
     required_columns: [river, station, date, Q_m3s, source_id, dataset_version, original_value, original_unit, quality_flag, provenance_tier, notes]
   daily_hydroclimate_canonical:
-    required_columns: [river, date, aggregation_geometry, aggregation_geometry_id, temperature_2m_C, precipitation_m, snow_depth_m, snowmelt_m, surface_runoff_m, subsurface_runoff_m, total_runoff_m, positive_degree_day_Cday, snow_cover_fraction, snow_depletion_rate_7d, source_id, notes]
+    required_columns: [river, date, aggregation_geometry, aggregation_geometry_id, temperature_2m_C, precipitation_m, snow_depth_m, snowmelt_m, surface_runoff_m, subsurface_runoff_m, total_runoff_m, positive_degree_day_Cday, snow_cover_fraction, snow_depletion_rate_7d, source_id, quality_flag, snapshot_path, original_relative_path, sha256, notes]
   roi_catalog:
-    required_columns: [river, roi_set, roi_path, roi_exists, roi_area_m2, roi_source, roi_risk, manual_review_required, notes]
+    required_columns: [river, roi_set, roi_path, roi_exists, roi_area_m2, roi_source, roi_risk, manual_review_required, source_id, snapshot_path, original_relative_path, sha256, quality_flag, notes]
   optical_timeseries_canonical:
-    required_columns: [river, date, datetime, sensor, collection, processing_level, roi_set, pixel_size_m, blue, green, red, nir, swir1, swir2, ndwi, mndwi, red_green_ratio, green_blue_ratio, n_valid_water_pixels, n_total_pixels, pct_valid_water_pixels, cloud_snow_water_mask_method, image_id, source_id, quality_flag, notes]
+    required_columns: [river, date, datetime, sensor, collection, processing_level, roi_set, pixel_size_m, blue, green, red, nir, swir1, swir2, ndwi, mndwi, red_green_ratio, green_blue_ratio, n_valid_water_pixels, n_total_pixels, pct_valid_water_pixels, cloud_snow_water_mask_method, image_id, source_id, quality_flag, snapshot_path, original_relative_path, sha256, notes]
   basin_context_canonical:
     required_columns: [river, basin_id, geometry_source, upstream_area_km2, hydroatlas_attributes_json, landcover_attributes_json, climate_aggregation_notes, source_id, notes]
+  auxiliary_context_canonical:
+    required_columns: [river, year, date, context_family, variable, value, unit, source_id, snapshot_path, original_relative_path, sha256, quality_flag, notes]
   training_matrix_daily_predictable:
     required_columns: [label_id, river, date, DOC_mgC_L, Q_m3s, doy, sin_doy, cos_doy, temperature_2m_C, positive_degree_day_Cday, snow_cover_fraction, snow_depletion_rate_7d, surface_runoff_m, flushing_potential_index, dilution_potential_index, basin_context_available, optical_match_hls_available, optical_match_sentinel2_available, optical_match_landsat_available, provenance_tier, usability_tier]
-

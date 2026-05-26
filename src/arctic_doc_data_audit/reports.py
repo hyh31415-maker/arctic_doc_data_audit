@@ -17,6 +17,16 @@ def _read_processed(table_name: str) -> pd.DataFrame:
         return empty_table(table_name)
 
 
+def _read_output_table(file_name: str) -> pd.DataFrame:
+    table_path = TABLE_DIR / file_name
+    if not table_path.exists():
+        return pd.DataFrame()
+    try:
+        return pd.read_csv(table_path).fillna("")
+    except Exception:
+        return pd.DataFrame()
+
+
 def _md_table(frame: pd.DataFrame, max_rows: int = 500) -> str:
     if frame.empty:
         return "_No rows._"
@@ -99,6 +109,47 @@ def _optical_match_counts(labels: pd.DataFrame, optical: pd.DataFrame) -> pd.Dat
     return pd.DataFrame(rows)
 
 
+def _old_snapshot_breakdown(inventory: pd.DataFrame) -> pd.DataFrame:
+    if inventory.empty:
+        return pd.DataFrame(columns=["old_project_subdir", "file_count"])
+    out = inventory.groupby("old_project_subdir", dropna=False).size().reset_index(name="file_count")
+    total = pd.DataFrame([{"old_project_subdir": "total", "file_count": int(out["file_count"].sum())}])
+    return pd.concat([out, total], ignore_index=True)
+
+
+def _old_snapshot_promotable(inventory: pd.DataFrame) -> pd.DataFrame:
+    if inventory.empty:
+        return pd.DataFrame(columns=["product_family", "file_count", "target_canonical_table"])
+    promotable = inventory[inventory["promotable_to_canonical"].astype(str).str.lower().isin(["true", "1"])]
+    if promotable.empty:
+        return pd.DataFrame(columns=["product_family", "file_count", "target_canonical_table"])
+    return (
+        promotable.groupby(["inferred_product_family", "target_canonical_table"], dropna=False)
+        .size()
+        .reset_index(name="file_count")
+        .rename(columns={"inferred_product_family": "product_family"})
+        .sort_values(["product_family", "target_canonical_table"])
+    )
+
+
+def _source_composition(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    rows = []
+    old_source = "old_arctic_doc_snowmelt_untrained_data"
+    for table_name, frame in tables.items():
+        if frame.empty or "source_id" not in frame.columns:
+            rows.append({"canonical_table": table_name, "source_id": "", "rows": 0})
+            rows.append({"canonical_table": table_name, "source_id": old_source, "rows": 0})
+            continue
+        counts = frame.groupby("source_id", dropna=False).size().reset_index(name="rows")
+        seen = set()
+        for _, row in counts.iterrows():
+            seen.add(str(row["source_id"]))
+            rows.append({"canonical_table": table_name, "source_id": row["source_id"], "rows": int(row["rows"])})
+        if old_source not in seen:
+            rows.append({"canonical_table": table_name, "source_id": old_source, "rows": 0})
+    return pd.DataFrame(rows)
+
+
 def generate_data_availability_report() -> Path:
     ensure_project_dirs()
     manifest = read_manifest()
@@ -108,7 +159,13 @@ def generate_data_availability_report() -> Path:
     discharge = _read_processed("daily_discharge_canonical")
     hydro = _read_processed("daily_hydroclimate_canonical")
     optical = _read_processed("optical_timeseries_canonical")
+    roi = _read_processed("roi_catalog")
+    auxiliary = _read_processed("auxiliary_context_canonical")
     matrix = _read_processed("training_matrix_daily_predictable")
+    inventory = _read_output_table("old_snapshot_inventory.csv")
+    raw_compare = _read_output_table("old_snapshot_raw_compare.csv")
+    promotion = _read_output_table("old_snapshot_promotion_summary.csv")
+    hydro_unmapped = _read_output_table("old_snapshot_hydroclimate_unmapped_columns.csv")
 
     report = [
         "# Data Availability Report",
@@ -141,6 +198,42 @@ def generate_data_availability_report() -> Path:
         "",
         "## 9. Optical Matched DOC Sample Count",
         _md_table(_optical_match_counts(labels, optical)),
+        "",
+        "## Old Project Snapshot Breakdown",
+        _md_table(_old_snapshot_breakdown(inventory)),
+        "",
+        "## Old Snapshot Promotable Files",
+        _md_table(_old_snapshot_promotable(inventory)),
+        "",
+        "## Old Snapshot Promotion Summary",
+        _md_table(promotion),
+        "",
+        "## Old Snapshot Raw Duplicate/Conflict Summary",
+        _md_table(_count_table(raw_compare, ["decision"], "file_count") if not raw_compare.empty else raw_compare),
+        "",
+        "## Old Snapshot ROI Promotion Summary",
+        _md_table(_count_table(roi[roi["source_id"] == "old_arctic_doc_snowmelt_untrained_data"] if not roi.empty and "source_id" in roi.columns else roi, ["river", "roi_set"], "roi_count")),
+        "",
+        "## Old Snapshot Hydroclimate Promotion Summary",
+        _md_table(_coverage(hydro[hydro["source_id"] == "old_arctic_doc_snowmelt_untrained_data"] if not hydro.empty and "source_id" in hydro.columns else hydro, "date")),
+        "",
+        "## Old Snapshot Optical Promotion Summary",
+        _md_table(_count_table(optical[optical["source_id"] == "old_arctic_doc_snowmelt_untrained_data"] if not optical.empty and "source_id" in optical.columns else optical, ["river", "sensor"], "optical_rows")),
+        "",
+        "## Canonical Tables Source Composition",
+        _md_table(_source_composition({
+            "doc_labels_canonical": labels,
+            "daily_hydroclimate_canonical": hydro,
+            "optical_timeseries_canonical": optical,
+            "roi_catalog": roi,
+            "auxiliary_context_canonical": auxiliary,
+        })),
+        "",
+        "## Remaining Snapshot Files Not Promoted",
+        _md_table(inventory[inventory["promotable_to_canonical"].astype(str).str.lower().isin(["false", "0", ""])][["snapshot_path", "inferred_product_family", "not_promoted_reason"]] if not inventory.empty else inventory),
+        "",
+        "## Old Snapshot Hydroclimate Unmapped Columns",
+        _md_table(hydro_unmapped),
         "",
         "## 10. Duplicate Statistics and Rules",
         "Deduplication groups records by river, station, date, parameter, and sample id when available. Preference order is official ArcticGRO current, accepted/non-flagged records, explicit DOC, complete coordinates, and newest version.",
@@ -178,6 +271,11 @@ def generate_provenance_report() -> Path:
     hydro = _read_processed("daily_hydroclimate_canonical")
     optical = _read_processed("optical_timeseries_canonical")
     basin = _read_processed("basin_context_canonical")
+    roi = _read_processed("roi_catalog")
+    auxiliary = _read_processed("auxiliary_context_canonical")
+    inventory = _read_output_table("old_snapshot_inventory.csv")
+    raw_compare = _read_output_table("old_snapshot_raw_compare.csv")
+    promotion = _read_output_table("old_snapshot_promotion_summary.csv")
     tables = {
         "doc_labels_canonical": labels,
         "lab_optical_proxy_canonical": absorbance,
@@ -185,6 +283,8 @@ def generate_provenance_report() -> Path:
         "daily_hydroclimate_canonical": hydro,
         "optical_timeseries_canonical": optical,
         "basin_context_canonical": basin,
+        "roi_catalog": roi,
+        "auxiliary_context_canonical": auxiliary,
     }
     lines = [
         "# Provenance Report",
@@ -221,6 +321,21 @@ def generate_provenance_report() -> Path:
             "",
             "## Scientific Boundary",
             "Lab absorbance/CDOM supports mechanism validation only by default. Satellite reflectance remains optical proxy data, never DOC labels.",
+            "",
+            "## Old Snapshot Audit and Promotion",
+            "Old snapshot files are audited from `old_arctic_doc_snowmelt_untrained_data`. Raw ArcticGRO files are compared to current official downloads and are not directly promoted. Legacy ROI, hydroclimate, HLS optical proxy, and auxiliary context rows are marked with legacy quality flags and snapshot provenance.",
+            "",
+            "### Old Snapshot Breakdown",
+            _md_table(_old_snapshot_breakdown(inventory)),
+            "",
+            "### Old Snapshot Promotion Summary",
+            _md_table(promotion),
+            "",
+            "### Old Snapshot Raw Decisions",
+            _md_table(_count_table(raw_compare, ["decision"], "file_count") if not raw_compare.empty else raw_compare),
+            "",
+            "### Canonical Tables Source Composition",
+            _md_table(_source_composition(tables)),
         ]
     )
     out = REPORT_DIR / "provenance_report.md"

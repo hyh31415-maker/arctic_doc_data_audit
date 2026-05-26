@@ -25,6 +25,7 @@ python -m arctic_doc_data_audit.cli download --source arcticgro --dry-run
 python -m arctic_doc_data_audit.cli download --source arcticgro
 python -m arctic_doc_data_audit.cli preprocess --all
 python -m arctic_doc_data_audit.cli build-training-matrix
+python -m arctic_doc_data_audit.cli model-readiness
 python -m arctic_doc_data_audit.cli report
 python -m pytest
 ```
@@ -37,6 +38,7 @@ make download-arcticgro
 make download-candidates
 make preprocess
 make build-matrix
+make model-readiness
 make report
 make test
 ```
@@ -55,6 +57,7 @@ make test
 - `data/processed/training_matrix_daily_predictable.csv`
 - `outputs/reports/data_availability_report.md`
 - `outputs/reports/provenance_report.md`
+- `outputs/reports/model_readiness_report.md`
 
 Raw, interim, and processed data directories are gitignored. Manifests and reports are lightweight audit artifacts and may be committed when they contain no sensitive local paths.
 
@@ -103,6 +106,7 @@ python -m arctic_doc_data_audit.cli audit-old-snapshot
 python -m arctic_doc_data_audit.cli promote-old-snapshot --all
 python -m arctic_doc_data_audit.cli preprocess --all
 python -m arctic_doc_data_audit.cli build-training-matrix
+python -m arctic_doc_data_audit.cli model-readiness
 python -m arctic_doc_data_audit.cli report
 ```
 
@@ -119,3 +123,11 @@ Legacy GEE/HLS/ERA5/MODIS rows are marked as legacy snapshot sources and can lat
 ## Future Training Inputs
 
 Future modeling code should read `doc_labels_canonical.csv`, `daily_discharge_canonical.csv`, `daily_hydroclimate_canonical.csv`, `optical_timeseries_canonical.csv`, and `basin_context_canonical.csv`. The prepared `training_matrix_daily_predictable.csv` intentionally excludes lab absorbance/CDOM columns and is only a future input table, not a model result.
+
+Before training, run:
+
+```powershell
+python -m arctic_doc_data_audit.cli model-readiness
+```
+
+This writes `outputs/reports/model_readiness_report.md` plus readiness tables in `outputs/tables/`. It checks label counts, predictor completeness, optical match windows, season-window coverage, source composition, and ROI review status without training any model.

@@ -1,4 +1,4 @@
-.PHONY: init download-arcticgro download-candidates preprocess build-matrix report test
+.PHONY: init download-arcticgro download-candidates preprocess build-matrix model-readiness report test
 
 PYTHON ?= python
 
@@ -20,9 +20,11 @@ preprocess:
 build-matrix:
 	$(PYTHON) -m arctic_doc_data_audit.cli build-training-matrix
 
+model-readiness:
+	$(PYTHON) -m arctic_doc_data_audit.cli model-readiness
+
 report:
 	$(PYTHON) -m arctic_doc_data_audit.cli report
 
 test:
 	$(PYTHON) -m pytest
-

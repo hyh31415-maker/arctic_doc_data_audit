@@ -55,6 +55,12 @@ def build_training_matrix() -> None:
     training_matrix.run()
 
 
+def model_readiness() -> None:
+    from .model_readiness import generate_model_readiness_report
+
+    generate_model_readiness_report()
+
+
 def audit_old_snapshot() -> None:
     from .preprocess import old_snapshot
 
@@ -117,6 +123,7 @@ def build_parser() -> argparse.ArgumentParser:
     preprocess.add_argument("--all", action="store_true", help="Run all preprocessors.")
 
     subparsers.add_parser("build-training-matrix", help="Build future daily-predictable training matrix without training a model.")
+    subparsers.add_parser("model-readiness", help="Audit whether canonical data are ready for future model training without training a model.")
     subparsers.add_parser("audit-old-snapshot", help="Audit old project snapshot files and generate inventory/raw-compare tables.")
     promote = subparsers.add_parser("promote-old-snapshot", help="Promote audited old snapshot families into canonical tables.")
     promote.add_argument("--families", default="", help="Comma-separated families: roi,hydroclimate,optical,auxiliary,raw_compare.")
@@ -150,6 +157,9 @@ def main(argv: Iterable[str] | None = None) -> None:
         build_training_matrix()
         generate_reports()
         logger.info("Training matrix built without model training.")
+    elif args.command == "model-readiness":
+        model_readiness()
+        logger.info("Model readiness report generated without model training.")
     elif args.command == "audit-old-snapshot":
         audit_old_snapshot()
         generate_reports()

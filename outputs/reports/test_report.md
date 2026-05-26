@@ -10,13 +10,14 @@ No DOC model training was run.
 python -m arctic_doc_data_audit.cli promote-old-snapshot --all
 python -m arctic_doc_data_audit.cli build-training-matrix
 python -m arctic_doc_data_audit.cli report
+python -m arctic_doc_data_audit.cli model-readiness
 python -m pytest
 ```
 
 ## Result
 
 ```text
-21 passed in 1.28s
+25 passed in 20.01s
 ```
 
 ## Data-Layer Checks
@@ -26,3 +27,4 @@ python -m pytest
 - `snowmelt_total_m` is mapped to `snowmelt_m`.
 - `mean_ndsi_snow_cover` and `valid_modis_pixels` are retained in the hydroclimate sidecar/QC table.
 - `training_matrix_daily_predictable.csv` still excludes lab absorbance/CDOM columns.
+- `model-readiness` generates readiness tables and report without training a model.

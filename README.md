@@ -52,6 +52,10 @@ make complete-data-sources
 make audit-candidate-labels
 make model-readiness
 make freeze-data
+make final-data-clean
+make build-gold-tables
+make build-model-input-matrices
+make freeze-gold-data
 make gee-auth-check
 make run-gee-extraction
 make complete-basin-context
@@ -208,3 +212,26 @@ python -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_YYYYMMDD
 The workflow parses official HydroSHEDS product pages first and uses `configs/hydrosheds_full.yaml` manual URLs only as a fallback. HydroATLAS package downloads use stable `https://ndownloader.figshare.com/files/<file_id>` links to avoid the `figshare.com/ndownloader` WAF challenge; documentation and catalogs use `data.hydrosheds.org` PDF links. Station snapping uses HydroRIVERS; station basin matching uses HydroBASINS levels 6-9; upstream membership is built from `NEXT_DOWN` topology and never from ROI area. Publication-grade readiness is true only when all six rivers have upstream HydroBASINS context plus HydroATLAS attributes marked as complete or partial.
 
 The full HydroATLAS list is `BasinATLAS_Data_v10.gdb.zip`, `BasinATLAS_Data_v10_shp.zip`, `RiverATLAS_Data_v10.gdb.zip`, `RiverATLAS_Data_v10_shp.zip`, `LakeATLAS_Data_v10.gdb.zip`, `LakeATLAS_Data_v10_shp.zip`, `HydroATLAS_TechDoc_v10_1.pdf`, `BasinATLAS_Catalog_v10.pdf`, `RiverATLAS_Catalog_v10.pdf`, and `LakeATLAS_Catalog_v10.pdf`. GDB packages are unpacked because attribute extraction needs readable layers; SHP fallback packages and PDFs are downloaded and hash-checked but not unpacked by default.
+
+## Gold Data Freeze
+
+After publication-grade acquisition is complete, lock the modeling handoff with the gold freeze workflow:
+
+```powershell
+python -m arctic_doc_data_audit.cli final-data-clean
+python -m arctic_doc_data_audit.cli build-gold-tables
+python -m arctic_doc_data_audit.cli build-model-input-matrices
+python -m arctic_doc_data_audit.cli model-readiness
+python -m arctic_doc_data_audit.cli freeze-gold-data --freeze-id data_freeze_gold_YYYYMMDD_v1
+```
+
+Gold commands read only the existing canonical/audit/manifest layer and write fixed outputs under `data/processed/gold/` plus audit artifacts under `outputs/reports/gold/` and `outputs/tables/gold/`. They do not query new sources, train DOC models, generate DOC predictions, or generate flux.
+
+After gold freeze, modeling projects should read only:
+
+- `data/processed/gold/training_matrix_hydrocore.csv`
+- `data/processed/gold/training_matrix_basin_context.csv`
+- `data/processed/gold/training_matrix_optical_matched_*.csv`
+- `data/processed/gold/prediction_grid_daily_hydrocore.csv`
+
+The gold production matrices exclude lab absorbance/CDOM (`A254`, `A375`, `A440`, `SUVA254`, spectral slopes). Optical reflectance stays an optical sensitivity predictor, not a DOC observation. HydroATLAS identifiers and topology fields remain metadata and are not model predictors. If processed gold CSVs are not committed, the freeze report, table hashes, data dictionary, QA tables, and reproduction commands define the fixed handoff.

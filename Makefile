@@ -1,4 +1,4 @@
-.PHONY: init download-arcticgro download-candidates preprocess build-matrix complete-data-sources audit-candidate-labels model-readiness freeze-data qa-data fix-gee-failures discover-wqp-characteristics gee-auth-check run-gee-extraction complete-basin-context download-hydrosheds-full index-hydrosheds-full match-stations-to-hydrorivers match-stations-to-hydrobasins build-upstream-basin-context extract-hydroatlas-attributes build-basin-context-from-hydrosheds finalize-candidate-sources report test
+.PHONY: init download-arcticgro download-candidates preprocess build-matrix complete-data-sources audit-candidate-labels model-readiness freeze-data final-data-clean build-gold-tables build-model-input-matrices freeze-gold-data qa-data fix-gee-failures discover-wqp-characteristics gee-auth-check run-gee-extraction complete-basin-context download-hydrosheds-full index-hydrosheds-full match-stations-to-hydrorivers match-stations-to-hydrobasins build-upstream-basin-context extract-hydroatlas-attributes build-basin-context-from-hydrosheds finalize-candidate-sources report test
 
 PYTHON ?= python
 
@@ -31,6 +31,18 @@ model-readiness:
 
 freeze-data:
 	$(PYTHON) -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_$(shell powershell -NoProfile -Command "Get-Date -Format yyyyMMdd")_v1
+
+final-data-clean:
+	$(PYTHON) -m arctic_doc_data_audit.cli final-data-clean
+
+build-gold-tables:
+	$(PYTHON) -m arctic_doc_data_audit.cli build-gold-tables
+
+build-model-input-matrices:
+	$(PYTHON) -m arctic_doc_data_audit.cli build-model-input-matrices
+
+freeze-gold-data:
+	$(PYTHON) -m arctic_doc_data_audit.cli freeze-gold-data --freeze-id data_freeze_gold_$(shell powershell -NoProfile -Command "Get-Date -Format yyyyMMdd")_v1
 
 qa-data:
 	$(PYTHON) -m arctic_doc_data_audit.cli qa-data

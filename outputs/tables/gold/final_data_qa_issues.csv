@@ -1,0 +1,3 @@
+issue_id,severity,table_name,column_name,river,date,issue_type,description,blocking_for_gold_freeze,blocking_for_modeling,recommended_action,resolution_status,notes
+GOLD-QA-0001,low,daily_hydroclimate_gold.csv,snowmelt_m,,,range_check_flag,137 rows are outside the configured screening range.,False,False,Track as non-fatal QA note or sensitivity item.,accepted_non_blocking,Flagged for review; not a gold freeze blocker unless confirmed as a fatal data bug.
+GOLD-QA-0002,low,daily_hydroclimate_gold.csv,surface_runoff_m,,,range_check_flag,71 rows are outside the configured screening range.,False,False,Track as non-fatal QA note or sensitivity item.,accepted_non_blocking,Flagged for review; not a gold freeze blocker unless confirmed as a fatal data bug.

@@ -1,0 +1,5 @@
+table_name,keys,duplicate_rows
+doc_labels_gold.csv,label_id,0
+daily_discharge_gold.csv,river;date,0
+daily_hydroclimate_gold.csv,river;date,0
+basin_context_gold.csv,river,0

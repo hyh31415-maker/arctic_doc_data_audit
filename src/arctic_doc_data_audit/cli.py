@@ -61,6 +61,30 @@ def model_readiness() -> None:
     generate_model_readiness_report()
 
 
+def final_data_clean() -> None:
+    from .gold import final_data_clean as run_final_data_clean
+
+    run_final_data_clean()
+
+
+def build_gold_tables() -> None:
+    from .gold import build_gold_tables as run_build_gold_tables
+
+    run_build_gold_tables()
+
+
+def build_model_input_matrices() -> None:
+    from .gold import build_model_input_matrices as run_build_model_input_matrices
+
+    run_build_model_input_matrices()
+
+
+def freeze_gold_data(args: argparse.Namespace) -> None:
+    from .gold import freeze_gold_data as run_freeze_gold_data
+
+    run_freeze_gold_data(args.freeze_id)
+
+
 def complete_data_sources(args: argparse.Namespace) -> None:
     from .data_completion import complete_data_sources as run_completion
 
@@ -229,6 +253,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers.add_parser("build-training-matrix", help="Build future daily-predictable training matrix without training a model.")
     subparsers.add_parser("model-readiness", help="Audit whether canonical data are ready for future model training without training a model.")
+    subparsers.add_parser("final-data-clean", help="Run final canonical-to-gold cleaning checks without model training.")
+    subparsers.add_parser("build-gold-tables", help="Build fixed gold tables from existing canonical tables without reading raw/interim data.")
+    subparsers.add_parser("build-model-input-matrices", help="Build model-ready gold input matrices without training a model.")
+    gold_freeze = subparsers.add_parser("freeze-gold-data", help="Create the gold data freeze manifest and reports without training a model.")
+    gold_freeze.add_argument("--freeze-id", required=True, help="Gold freeze identifier, e.g. data_freeze_gold_YYYYMMDD_v1.")
     complete = subparsers.add_parser("complete-data-sources", help="Complete candidate source queries and data-freeze prerequisites without model training.")
     complete.add_argument("--all", action="store_true", help="Run every data-completion source audit/query.")
     candidate_audit = subparsers.add_parser("audit-candidate-labels", help="Audit candidate external labels and duplicate decisions without default promotion.")
@@ -294,6 +323,18 @@ def main(argv: Iterable[str] | None = None) -> None:
     elif args.command == "model-readiness":
         model_readiness()
         logger.info("Model readiness report generated without model training.")
+    elif args.command == "final-data-clean":
+        final_data_clean()
+        logger.info("Final data cleaning report generated without model training.")
+    elif args.command == "build-gold-tables":
+        build_gold_tables()
+        logger.info("Gold tables built without model training.")
+    elif args.command == "build-model-input-matrices":
+        build_model_input_matrices()
+        logger.info("Gold model input matrices built without model training.")
+    elif args.command == "freeze-gold-data":
+        freeze_gold_data(args)
+        logger.info("Gold data freeze generated without model training.")
     elif args.command == "complete-data-sources":
         complete_data_sources(args)
         logger.info("Data source completion finished without model training.")

@@ -1,0 +1,9 @@
+table_name,column_name,checked_rows,out_of_range_rows,min_allowed,max_allowed,min_value,max_value
+doc_labels_gold.csv,value_mgC_L,547,0,0,200.0,2.1,23.5
+daily_discharge_gold.csv,Q_m3s,147186,0,0,,19.6,215000.0
+daily_hydroclimate_gold.csv,temperature_2m_C,51685,0,-80,50.0,-54.27905529962067,27.69103280219479
+daily_hydroclimate_gold.csv,positive_degree_day_Cday,51685,0,0,,0.0,27.69103280219479
+daily_hydroclimate_gold.csv,snow_cover_fraction,33677,0,0,1.0,0.0,1.0
+daily_hydroclimate_gold.csv,snowmelt_m,51685,137,0,,-3.725290298461914e-09,1.1140229215610091
+daily_hydroclimate_gold.csv,surface_runoff_m,51685,71,0,,-2.9802322387695312e-08,0.9319168632572312
+optical_timeseries_gold.csv,pct_valid_water_pixels,94991,0,0,1.0,0.0,1.0

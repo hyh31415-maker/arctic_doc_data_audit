@@ -1,0 +1,8 @@
+input_table,rows,columns
+data/processed/doc_labels_canonical.csv,595,29
+data/processed/daily_discharge_canonical.csv,154370,11
+data/processed/daily_hydroclimate_canonical.csv,138432,20
+data/processed/optical_timeseries_canonical.csv,142058,29
+data/processed/basin_context_canonical.csv,6,12
+data/processed/roi_catalog.csv,39,14
+data/processed/lab_optical_proxy_canonical.csv,882,23

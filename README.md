@@ -25,7 +25,10 @@ python -m arctic_doc_data_audit.cli download --source arcticgro --dry-run
 python -m arctic_doc_data_audit.cli download --source arcticgro
 python -m arctic_doc_data_audit.cli preprocess --all
 python -m arctic_doc_data_audit.cli build-training-matrix
+python -m arctic_doc_data_audit.cli complete-data-sources --all
+python -m arctic_doc_data_audit.cli audit-candidate-labels
 python -m arctic_doc_data_audit.cli model-readiness
+python -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_YYYYMMDD_v1
 python -m arctic_doc_data_audit.cli report
 python -m pytest
 ```
@@ -38,7 +41,10 @@ make download-arcticgro
 make download-candidates
 make preprocess
 make build-matrix
+make complete-data-sources
+make audit-candidate-labels
 make model-readiness
+make freeze-data
 make report
 make test
 ```
@@ -58,6 +64,8 @@ make test
 - `outputs/reports/data_availability_report.md`
 - `outputs/reports/provenance_report.md`
 - `outputs/reports/model_readiness_report.md`
+- `outputs/reports/gee_extraction_readiness_report.md`
+- `outputs/reports/data_freeze_report.md`
 
 Raw, interim, and processed data directories are gitignored. Manifests and reports are lightweight audit artifacts and may be committed when they contain no sensitive local paths.
 
@@ -127,7 +135,10 @@ Future modeling code should read `doc_labels_canonical.csv`, `daily_discharge_ca
 Before training, run:
 
 ```powershell
+python -m arctic_doc_data_audit.cli complete-data-sources --all
+python -m arctic_doc_data_audit.cli audit-candidate-labels
 python -m arctic_doc_data_audit.cli model-readiness
+python -m arctic_doc_data_audit.cli freeze-data --freeze-id data_freeze_YYYYMMDD_v1
 ```
 
-This writes `outputs/reports/model_readiness_report.md` plus readiness tables in `outputs/tables/`. It checks label counts, predictor completeness, optical match windows, season-window coverage, source composition, and ROI review status without training any model.
+`complete-data-sources` queries or indexes remaining candidate sources, records failures/manual requirements in the manifest, and writes candidate QC tables without promotion. `audit-candidate-labels` produces a promotion plan only by default. `model-readiness` checks label counts, predictor completeness, optical match windows, season-window coverage, source composition, and ROI review status. `freeze-data` hashes canonical tables and declares whether the data freeze is ready for baseline or full training. None of these commands trains a model.

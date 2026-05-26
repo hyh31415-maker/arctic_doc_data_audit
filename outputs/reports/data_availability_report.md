@@ -3,62 +3,84 @@
 This report audits data acquisition and preprocessing readiness only. No DOC model was trained.
 
 ## 1. Download Status Summary
-| source_id                                      | download_status   | failure_reason                                                                                                     |   file_count |
-|:-----------------------------------------------|:------------------|:-------------------------------------------------------------------------------------------------------------------|-------------:|
-| arctic_data_center_tank_2023                   | dry_run           | Dry-run only. Resolve DOI and review package members before bulk download.                                         |            1 |
-| arcticgro_absorbance_archived                  | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                  |            1 |
-| arcticgro_absorbance_current                   | downloaded        |                                                                                                                    |            1 |
-| arcticgro_data_page                            | downloaded        |                                                                                                                    |            1 |
-| arcticgro_discharge_archived                   | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                  |            1 |
-| arcticgro_discharge_current                    | downloaded        |                                                                                                                    |            7 |
-| arcticgro_spatial_data                         | manual_required   | Spatial folder may contain multiple files; manual review required before download.                                 |            1 |
-| arcticgro_water_quality_archived               | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                  |            1 |
-| arcticgro_water_quality_current                | downloaded        |                                                                                                                    |            2 |
-| arcticgro_water_quality_flags                  | manual_required   | Flag codes are extracted during preprocessing from the Water Quality workbook.                                     |            1 |
-| arcticgro_water_quality_metadata               | downloaded        |                                                                                                                    |            1 |
-| arcticgro_water_quality_parameter_descriptions | downloaded        |                                                                                                                    |            1 |
-| datastream_mackenzie_candidate                 | dry_run           | Use DataStream API/hub search for Mackenzie DOC/TOC/CDOM/UV/turbidity candidates; keep candidate-only QC.          |            1 |
-| gee_era5_land                                  | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                     |            1 |
-| gee_hls_s30_l30                                | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export. |            1 |
-| gee_landsat_c2_l2                              | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export. |            1 |
-| gee_modis_mod10a1                              | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                     |            1 |
-| gee_sentinel2_sr_harmonized                    | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export. |            1 |
-| gee_smap_context_optional                      | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                     |            1 |
-| hydroatlas                                     | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.           |            1 |
-| hydrobasins                                    | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.           |            1 |
-| old_arctic_doc_snowmelt_outputs                | downloaded        |                                                                                                                    |            4 |
-| old_arctic_doc_snowmelt_untrained_data         | downloaded        |                                                                                                                    |          166 |
-| partners_mdpi_eurasian_candidate               | dry_run           | Search/download supplementary tables conservatively and preserve article/source citation before parsing.           |            1 |
-| wqp_usgs_yukon_candidate                       | dry_run           | Candidate query only; results need label QC before use.                                                            |            1 |
+| source_id                                      | download_status   | failure_reason                                                                                                                |   file_count |
+|:-----------------------------------------------|:------------------|:------------------------------------------------------------------------------------------------------------------------------|-------------:|
+| arctic_data_center_tank_2023                   | downloaded        |                                                                                                                               |            1 |
+| arcticgro_absorbance_archived                  | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
+| arcticgro_absorbance_current                   | downloaded        |                                                                                                                               |            1 |
+| arcticgro_data_page                            | downloaded        |                                                                                                                               |            1 |
+| arcticgro_discharge_archived                   | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
+| arcticgro_discharge_current                    | downloaded        |                                                                                                                               |            7 |
+| arcticgro_spatial_data                         | manual_required   | Spatial folder may contain multiple files; manual review required before download.                                            |            1 |
+| arcticgro_water_quality_archived               | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
+| arcticgro_water_quality_current                | downloaded        |                                                                                                                               |            2 |
+| arcticgro_water_quality_flags                  | manual_required   | Flag codes are extracted during preprocessing from the Water Quality workbook.                                                |            1 |
+| arcticgro_water_quality_metadata               | downloaded        |                                                                                                                               |            1 |
+| arcticgro_water_quality_parameter_descriptions | downloaded        |                                                                                                                               |            1 |
+| datastream_mackenzie_candidate                 | dry_run           | Use DataStream API/hub search for Mackenzie DOC/TOC/CDOM/UV/turbidity candidates; keep candidate-only QC.                     |            1 |
+| datastream_mackenzie_candidate                 | failed            | DATASTREAM_API_KEY is not configured; DataStream API requires x-api-key. Manual/API-key acquisition required.                 |            1 |
+| gee_era5_land                                  | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
+| gee_hls_s30_l30                                | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
+| gee_landsat_c2_l2                              | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
+| gee_modis_mod10a1                              | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
+| gee_sentinel2_sr_harmonized                    | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
+| gee_smap_context_optional                      | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
+| hydroatlas                                     | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                      |            1 |
+| hydrobasins                                    | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                      |            1 |
+| old_arctic_doc_snowmelt_outputs                | downloaded        |                                                                                                                               |            4 |
+| old_arctic_doc_snowmelt_untrained_data         | downloaded        |                                                                                                                               |          166 |
+| partners_mdpi_eurasian_candidate               | dry_run           | Search/download supplementary tables conservatively and preserve article/source citation before parsing.                      |            1 |
+| partners_mdpi_eurasian_candidate               | failed            | HTTP 403;                                                                                                                     |            2 |
+| wqp_usgs_yukon_candidate                       | downloaded        |                                                                                                                               |            6 |
+| wqp_usgs_yukon_candidate                       | dry_run           | Candidate query only; results need label QC before use.                                                                       |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Absorbance at 254 nm is not in the list of enumerated values."             |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic carbon is not in the list of enumerated values."         |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic matter is not in the list of enumerated values."         |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Specific ultraviolet absorbance is not in the list of enumerated values."  |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Suspended sediment concentration is not in the list of enumerated values." |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Total organic carbon is not in the list of enumerated values."             |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=UV Absorbance is not in the list of enumerated values."                    |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Water temperature is not in the list of enumerated values."                |            1 |
 
 ## 2. Source-Level Files, Status, and Failures
-| source_id                                      | download_status   | failure_reason                                                                                                     |   file_count |
-|:-----------------------------------------------|:------------------|:-------------------------------------------------------------------------------------------------------------------|-------------:|
-| arctic_data_center_tank_2023                   | dry_run           | Dry-run only. Resolve DOI and review package members before bulk download.                                         |            1 |
-| arcticgro_absorbance_archived                  | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                  |            1 |
-| arcticgro_absorbance_current                   | downloaded        |                                                                                                                    |            1 |
-| arcticgro_data_page                            | downloaded        |                                                                                                                    |            1 |
-| arcticgro_discharge_archived                   | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                  |            1 |
-| arcticgro_discharge_current                    | downloaded        |                                                                                                                    |            7 |
-| arcticgro_spatial_data                         | manual_required   | Spatial folder may contain multiple files; manual review required before download.                                 |            1 |
-| arcticgro_water_quality_archived               | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                  |            1 |
-| arcticgro_water_quality_current                | downloaded        |                                                                                                                    |            2 |
-| arcticgro_water_quality_flags                  | manual_required   | Flag codes are extracted during preprocessing from the Water Quality workbook.                                     |            1 |
-| arcticgro_water_quality_metadata               | downloaded        |                                                                                                                    |            1 |
-| arcticgro_water_quality_parameter_descriptions | downloaded        |                                                                                                                    |            1 |
-| datastream_mackenzie_candidate                 | dry_run           | Use DataStream API/hub search for Mackenzie DOC/TOC/CDOM/UV/turbidity candidates; keep candidate-only QC.          |            1 |
-| gee_era5_land                                  | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                     |            1 |
-| gee_hls_s30_l30                                | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export. |            1 |
-| gee_landsat_c2_l2                              | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export. |            1 |
-| gee_modis_mod10a1                              | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                     |            1 |
-| gee_sentinel2_sr_harmonized                    | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export. |            1 |
-| gee_smap_context_optional                      | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                     |            1 |
-| hydroatlas                                     | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.           |            1 |
-| hydrobasins                                    | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.           |            1 |
-| old_arctic_doc_snowmelt_outputs                | downloaded        |                                                                                                                    |            4 |
-| old_arctic_doc_snowmelt_untrained_data         | downloaded        |                                                                                                                    |          166 |
-| partners_mdpi_eurasian_candidate               | dry_run           | Search/download supplementary tables conservatively and preserve article/source citation before parsing.           |            1 |
-| wqp_usgs_yukon_candidate                       | dry_run           | Candidate query only; results need label QC before use.                                                            |            1 |
+| source_id                                      | download_status   | failure_reason                                                                                                                |   file_count |
+|:-----------------------------------------------|:------------------|:------------------------------------------------------------------------------------------------------------------------------|-------------:|
+| arctic_data_center_tank_2023                   | downloaded        |                                                                                                                               |            1 |
+| arcticgro_absorbance_archived                  | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
+| arcticgro_absorbance_current                   | downloaded        |                                                                                                                               |            1 |
+| arcticgro_data_page                            | downloaded        |                                                                                                                               |            1 |
+| arcticgro_discharge_archived                   | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
+| arcticgro_discharge_current                    | downloaded        |                                                                                                                               |            7 |
+| arcticgro_spatial_data                         | manual_required   | Spatial folder may contain multiple files; manual review required before download.                                            |            1 |
+| arcticgro_water_quality_archived               | manual_required   | Google Drive archive folder is not bulk-downloaded automatically.                                                             |            1 |
+| arcticgro_water_quality_current                | downloaded        |                                                                                                                               |            2 |
+| arcticgro_water_quality_flags                  | manual_required   | Flag codes are extracted during preprocessing from the Water Quality workbook.                                                |            1 |
+| arcticgro_water_quality_metadata               | downloaded        |                                                                                                                               |            1 |
+| arcticgro_water_quality_parameter_descriptions | downloaded        |                                                                                                                               |            1 |
+| datastream_mackenzie_candidate                 | dry_run           | Use DataStream API/hub search for Mackenzie DOC/TOC/CDOM/UV/turbidity candidates; keep candidate-only QC.                     |            1 |
+| datastream_mackenzie_candidate                 | failed            | DATASTREAM_API_KEY is not configured; DataStream API requires x-api-key. Manual/API-key acquisition required.                 |            1 |
+| gee_era5_land                                  | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
+| gee_hls_s30_l30                                | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
+| gee_landsat_c2_l2                              | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
+| gee_modis_mod10a1                              | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
+| gee_sentinel2_sr_harmonized                    | report_only       | Earth Engine extraction not executed. rivers=all; years=2017-2025; roi_set=default. Authenticate EE before export.            |            1 |
+| gee_smap_context_optional                      | report_only       | Earth Engine hydroclimate extraction not executed. rivers=all; years=2000-2025; roi_set=basin.                                |            1 |
+| hydroatlas                                     | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                      |            1 |
+| hydrobasins                                    | dry_run           | Large HydroSHEDS products require size/license review; provide local files via configs/local_paths.yaml.                      |            1 |
+| old_arctic_doc_snowmelt_outputs                | downloaded        |                                                                                                                               |            4 |
+| old_arctic_doc_snowmelt_untrained_data         | downloaded        |                                                                                                                               |          166 |
+| partners_mdpi_eurasian_candidate               | dry_run           | Search/download supplementary tables conservatively and preserve article/source citation before parsing.                      |            1 |
+| partners_mdpi_eurasian_candidate               | failed            | HTTP 403;                                                                                                                     |            2 |
+| wqp_usgs_yukon_candidate                       | downloaded        |                                                                                                                               |            6 |
+| wqp_usgs_yukon_candidate                       | dry_run           | Candidate query only; results need label QC before use.                                                                       |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Absorbance at 254 nm is not in the list of enumerated values."             |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic carbon is not in the list of enumerated values."         |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Dissolved organic matter is not in the list of enumerated values."         |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Specific ultraviolet absorbance is not in the list of enumerated values."  |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Suspended sediment concentration is not in the list of enumerated values." |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Total organic carbon is not in the list of enumerated values."             |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=UV Absorbance is not in the list of enumerated values."                    |            1 |
+| wqp_usgs_yukon_candidate                       | failed            | HTTP 400; 299 WQP "The value of characteristicName=Water temperature is not in the list of enumerated values."                |            1 |
 
 ## 3. DOC Label Counts by River
 | river     |   raw_count |   canonical_count |   Tier_A |   Tier_B |   Tier_C |   Tier_D |   can_train_doc_model |   can_train_daily_flux_model |
@@ -962,6 +984,30 @@ Deduplication groups records by river, station, date, parameter, and sample id w
 - Recommended main training set: `training_matrix_daily_predictable.csv`, daily-predictable features only.
 - Recommended supplementary validation: `lab_optical_proxy_canonical.csv` for absorbance/CDOM mechanism checks.
 - Recommended optical sensitivity: HLS/Sentinel-2/Landsat matched subsets once `optical_timeseries_canonical.csv` is populated.
+
+## Data Completion Candidate Label Audit
+| source_id                | parameter_canonical                 | usability_tier   |   candidate_rows |
+|:-------------------------|:------------------------------------|:-----------------|-----------------:|
+| wqp_usgs_yukon_candidate | DOC                                 | C                |              231 |
+| wqp_usgs_yukon_candidate | DOC                                 | Excluded         |               51 |
+| wqp_usgs_yukon_candidate | organic_carbon_unspecified_fraction | D                |              197 |
+| wqp_usgs_yukon_candidate | proxy_or_context                    | Excluded         |              245 |
+
+## Basin Context Acquisition Status
+| source_id   | source_url                                      | local_path   | local_path_exists   | download_status   | basin_context_status   | failure_reason                                                                           | notes                                | overall_basin_context_status   |
+|:------------|:------------------------------------------------|:-------------|:--------------------|:------------------|:-----------------------|:-----------------------------------------------------------------------------------------|:-------------------------------------|:-------------------------------|
+| hydrobasins | https://www.hydrosheds.org/products/hydrobasins |              | False               | manual_required   | placeholder_only       | Large HydroBASINS/HydroATLAS files require manual download and configs/local_paths.yaml. | Basin context is not DOC label data. | placeholder_only               |
+| hydroatlas  | https://www.hydrosheds.org/products/hydroatlas  |              | False               | manual_required   | placeholder_only       | Large HydroBASINS/HydroATLAS files require manual download and configs/local_paths.yaml. | Basin context is not DOC label data. | placeholder_only               |
+
+## GEE Extraction Plan Summary
+| source_id                   | estimated_output_table       | needs_regeneration   |   planned_tasks |
+|:----------------------------|:-----------------------------|:---------------------|----------------:|
+| gee_era5_land               | daily_hydroclimate_canonical | True                 |               6 |
+| gee_hls_s30_l30             | optical_timeseries_canonical | True                 |               6 |
+| gee_landsat_c2_l2           | optical_timeseries_canonical | True                 |               6 |
+| gee_modis_mod10a1           | daily_hydroclimate_canonical | True                 |               6 |
+| gee_sentinel2_sr_harmonized | optical_timeseries_canonical | True                 |               6 |
+| gee_smap_context_optional   | auxiliary_context_canonical  | True                 |               6 |
 
 ## 13. Explicit Warnings
 - Do not use lab absorbance as production daily predictor.

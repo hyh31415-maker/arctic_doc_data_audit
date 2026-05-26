@@ -177,6 +177,9 @@ def generate_data_availability_report() -> Path:
     raw_compare = _read_output_table("old_snapshot_raw_compare.csv")
     promotion = _read_output_table("old_snapshot_promotion_summary.csv")
     hydro_unmapped = _read_output_table("old_snapshot_hydroclimate_unmapped_columns.csv")
+    candidate_summary = _read_output_table("candidate_label_audit_summary.csv")
+    basin_status = _read_output_table("hydrobasins_hydroatlas_acquisition_status.csv")
+    gee_plan = _read_output_table("gee_extraction_plan.csv")
 
     report = [
         "# Data Availability Report",
@@ -259,6 +262,15 @@ def generate_data_availability_report() -> Path:
         "- Recommended supplementary validation: `lab_optical_proxy_canonical.csv` for absorbance/CDOM mechanism checks.",
         "- Recommended optical sensitivity: HLS/Sentinel-2/Landsat matched subsets once `optical_timeseries_canonical.csv` is populated.",
         "",
+        "## Data Completion Candidate Label Audit",
+        _md_table(candidate_summary),
+        "",
+        "## Basin Context Acquisition Status",
+        _md_table(basin_status),
+        "",
+        "## GEE Extraction Plan Summary",
+        _md_table(_count_table(gee_plan, ["source_id", "estimated_output_table", "needs_regeneration"], "planned_tasks") if not gee_plan.empty else gee_plan),
+        "",
         "## 13. Explicit Warnings",
         "- Do not use lab absorbance as production daily predictor.",
         "- Do not treat satellite reflectance as direct DOC observation.",
@@ -287,6 +299,8 @@ def generate_provenance_report() -> Path:
     inventory = _read_output_table("old_snapshot_inventory.csv")
     raw_compare = _read_output_table("old_snapshot_raw_compare.csv")
     promotion = _read_output_table("old_snapshot_promotion_summary.csv")
+    candidate_summary = _read_output_table("candidate_label_audit_summary.csv")
+    freeze_hashes = _read_output_table("data_freeze_canonical_hashes.csv")
     tables = {
         "doc_labels_canonical": labels,
         "lab_optical_proxy_canonical": absorbance,
@@ -339,10 +353,16 @@ def generate_provenance_report() -> Path:
             "### Old Snapshot Breakdown",
             _md_table(_old_snapshot_breakdown(inventory)),
             "",
-            "### Old Snapshot Promotion Summary",
-            _md_table(promotion),
-            "",
-            "### Old Snapshot Raw Decisions",
+        "### Old Snapshot Promotion Summary",
+        _md_table(promotion),
+        "",
+        "### Candidate Label Audit Summary",
+        _md_table(candidate_summary),
+        "",
+        "### Data Freeze Canonical Hashes",
+        _md_table(freeze_hashes),
+        "",
+        "### Old Snapshot Raw Decisions",
             _md_table(_count_table(raw_compare, ["decision"], "file_count") if not raw_compare.empty else raw_compare),
             "",
             "### Canonical Tables Source Composition",

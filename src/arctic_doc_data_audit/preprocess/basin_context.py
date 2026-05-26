@@ -16,10 +16,13 @@ def run() -> pd.DataFrame:
                 "basin_id": "",
                 "geometry_source": "",
                 "upstream_area_km2": pd.NA,
+                "pfaf_id": "",
+                "attribute_source": "",
                 "hydroatlas_attributes_json": "{}",
                 "landcover_attributes_json": "{}",
                 "climate_aggregation_notes": "HydroBASINS/HydroATLAS local files not yet configured.",
                 "source_id": "hydrobasins;hydroatlas",
+                "quality_flag": "placeholder_only",
                 "notes": "Basin context placeholder; not a DOC label.",
             }
         )

@@ -18,7 +18,7 @@ tables:
   optical_timeseries_canonical:
     required_columns: [river, date, datetime, sensor, collection, processing_level, roi_set, pixel_size_m, blue, green, red, nir, swir1, swir2, ndwi, mndwi, red_green_ratio, green_blue_ratio, n_valid_water_pixels, n_total_pixels, pct_valid_water_pixels, cloud_snow_water_mask_method, image_id, source_id, quality_flag, snapshot_path, original_relative_path, sha256, notes]
   basin_context_canonical:
-    required_columns: [river, basin_id, geometry_source, upstream_area_km2, hydroatlas_attributes_json, landcover_attributes_json, climate_aggregation_notes, source_id, notes]
+    required_columns: [river, basin_id, geometry_source, upstream_area_km2, pfaf_id, attribute_source, hydroatlas_attributes_json, landcover_attributes_json, climate_aggregation_notes, source_id, quality_flag, notes]
   auxiliary_context_canonical:
     required_columns: [river, year, date, context_family, variable, value, unit, source_id, snapshot_path, original_relative_path, sha256, quality_flag, notes]
   training_matrix_daily_predictable:

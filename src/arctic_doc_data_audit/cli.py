@@ -61,6 +61,24 @@ def model_readiness() -> None:
     generate_model_readiness_report()
 
 
+def complete_data_sources(args: argparse.Namespace) -> None:
+    from .data_completion import complete_data_sources as run_completion
+
+    run_completion(all_sources=args.all)
+
+
+def audit_candidate_labels(args: argparse.Namespace) -> None:
+    from .data_completion import audit_candidate_labels as run_audit
+
+    run_audit(promote_approved=args.promote_approved)
+
+
+def freeze_data(args: argparse.Namespace) -> None:
+    from .data_completion import freeze_data as run_freeze
+
+    run_freeze(args.freeze_id, run_tests=True)
+
+
 def audit_old_snapshot() -> None:
     from .preprocess import old_snapshot
 
@@ -124,6 +142,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers.add_parser("build-training-matrix", help="Build future daily-predictable training matrix without training a model.")
     subparsers.add_parser("model-readiness", help="Audit whether canonical data are ready for future model training without training a model.")
+    complete = subparsers.add_parser("complete-data-sources", help="Complete candidate source queries and data-freeze prerequisites without model training.")
+    complete.add_argument("--all", action="store_true", help="Run every data-completion source audit/query.")
+    candidate_audit = subparsers.add_parser("audit-candidate-labels", help="Audit candidate external labels and duplicate decisions without default promotion.")
+    candidate_audit.add_argument("--promote-approved", action="store_true", help="Promote only explicitly approved candidates; default is no promotion.")
+    freeze = subparsers.add_parser("freeze-data", help="Create data freeze reports and hashes without training a model.")
+    freeze.add_argument("--freeze-id", required=True, help="Freeze identifier, e.g. data_freeze_YYYYMMDD_v1.")
     subparsers.add_parser("audit-old-snapshot", help="Audit old project snapshot files and generate inventory/raw-compare tables.")
     promote = subparsers.add_parser("promote-old-snapshot", help="Promote audited old snapshot families into canonical tables.")
     promote.add_argument("--families", default="", help="Comma-separated families: roi,hydroclimate,optical,auxiliary,raw_compare.")
@@ -160,6 +184,15 @@ def main(argv: Iterable[str] | None = None) -> None:
     elif args.command == "model-readiness":
         model_readiness()
         logger.info("Model readiness report generated without model training.")
+    elif args.command == "complete-data-sources":
+        complete_data_sources(args)
+        logger.info("Data source completion finished without model training.")
+    elif args.command == "audit-candidate-labels":
+        audit_candidate_labels(args)
+        logger.info("Candidate label audit finished without default promotion or model training.")
+    elif args.command == "freeze-data":
+        freeze_data(args)
+        logger.info("Data freeze report generated without model training.")
     elif args.command == "audit-old-snapshot":
         audit_old_snapshot()
         generate_reports()

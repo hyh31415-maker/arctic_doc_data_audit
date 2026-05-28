@@ -8,6 +8,9 @@ __pycache__/
 .ruff_cache/
 *.egg-info/
 
+# Local archive bundles
+backups/
+
 # Raw and generated data are reproducible outputs and must not be committed.
 data/raw/
 data/raw_external/
@@ -19,14 +22,24 @@ data/processed/
 !data/manifests/*.csv
 !data/manifests/*.json
 outputs/logs/
-outputs/tables/
+outputs/tables/*
+!outputs/tables/gold/
+!outputs/tables/gold/*.csv
+# Large row-level gold audit sidecars remain local and are covered by backup/hash manifests.
+outputs/tables/gold/hydroclimate_legacy_vs_regenerated_used.csv
+outputs/tables/gold/hydroclimate_source_resolution.csv
 outputs/figures/
 outputs/models/
+outputs/predictions/
+outputs/flux/
 outputs/**/*.parquet
 outputs/**/*.xlsx
 outputs/**/*.zip
 outputs/**/*.pkl
 outputs/**/*.joblib
+*.joblib
+*.pkl
+*.pickle
 
 # Local-only configuration
 configs/local_paths.yaml

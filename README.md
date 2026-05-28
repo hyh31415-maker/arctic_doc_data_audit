@@ -1,5 +1,23 @@
 # arctic_doc_data_audit
 
+## Frozen Data Repository
+
+This repository has completed `data_freeze_gold_20260526_v1`.
+No DOC model was trained in this repository. No DOC prediction or flux product was generated.
+
+Future modeling projects should read only:
+
+`data/processed/gold/*`
+
+The gold CSV files are local processed artifacts and remain gitignored. Their SHA256 hashes, schema, QA reports, and reproduction commands are recorded under:
+
+- `outputs/reports/gold/`
+- `outputs/tables/gold/`
+
+Do not modify data definitions unless a fatal data bug is identified under:
+
+`outputs/reports/gold/fatal_data_bug_policy.md`
+
 Clean data acquisition and preprocessing code for Arctic river DOC / CDOM / discharge / optical proxy / hydroclimate integration.
 
 This repository is a data-layer rebuild only. It downloads, audits, standardizes, deduplicates, joins, and reports data readiness for later Arctic river DOC / snowmelt / flux modeling. It does not train DOC models and does not make final scientific claims.
@@ -146,9 +164,11 @@ python -m arctic_doc_data_audit.cli report
 
 Legacy GEE/HLS/ERA5/MODIS rows are marked as legacy snapshot sources and can later be replaced by regenerated extraction from the new project.
 
-## Future Training Inputs
+## Historical Pre-Gold Training Inputs
 
-Future modeling code should read `doc_labels_canonical.csv`, `daily_discharge_canonical.csv`, `daily_hydroclimate_canonical.csv`, `optical_timeseries_canonical.csv`, and `basin_context_canonical.csv`. The prepared `training_matrix_daily_predictable.csv` intentionally excludes lab absorbance/CDOM columns and is only a future input table, not a model result.
+This section documents the pre-gold workflow retained for reproducibility. After `data_freeze_gold_20260526_v1`, future modeling repositories must not read these canonical tables directly and must read only `data/processed/gold/*`.
+
+Before the gold freeze, modeling readiness checks used `doc_labels_canonical.csv`, `daily_discharge_canonical.csv`, `daily_hydroclimate_canonical.csv`, `optical_timeseries_canonical.csv`, and `basin_context_canonical.csv`. The prepared `training_matrix_daily_predictable.csv` intentionally excludes lab absorbance/CDOM columns and is only an input table, not a model result.
 
 Before training, run:
 

@@ -85,6 +85,12 @@ def freeze_gold_data(args: argparse.Namespace) -> None:
     run_freeze_gold_data(args.freeze_id)
 
 
+def archive_gold_freeze(args: argparse.Namespace) -> None:
+    from .archive import archive_gold_freeze as run_archive_gold_freeze
+
+    run_archive_gold_freeze(args.freeze_id)
+
+
 def complete_data_sources(args: argparse.Namespace) -> None:
     from .data_completion import complete_data_sources as run_completion
 
@@ -258,6 +264,8 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("build-model-input-matrices", help="Build model-ready gold input matrices without training a model.")
     gold_freeze = subparsers.add_parser("freeze-gold-data", help="Create the gold data freeze manifest and reports without training a model.")
     gold_freeze.add_argument("--freeze-id", required=True, help="Gold freeze identifier, e.g. data_freeze_gold_YYYYMMDD_v1.")
+    gold_archive = subparsers.add_parser("archive-gold-freeze", help="Archive and seal an existing gold freeze without modifying gold CSVs or training a model.")
+    gold_archive.add_argument("--freeze-id", required=True, help="Gold freeze identifier, e.g. data_freeze_gold_YYYYMMDD_v1.")
     complete = subparsers.add_parser("complete-data-sources", help="Complete candidate source queries and data-freeze prerequisites without model training.")
     complete.add_argument("--all", action="store_true", help="Run every data-completion source audit/query.")
     candidate_audit = subparsers.add_parser("audit-candidate-labels", help="Audit candidate external labels and duplicate decisions without default promotion.")
@@ -335,6 +343,9 @@ def main(argv: Iterable[str] | None = None) -> None:
     elif args.command == "freeze-gold-data":
         freeze_gold_data(args)
         logger.info("Gold data freeze generated without model training.")
+    elif args.command == "archive-gold-freeze":
+        archive_gold_freeze(args)
+        logger.info("Gold data freeze archive report generated without model training.")
     elif args.command == "complete-data-sources":
         complete_data_sources(args)
         logger.info("Data source completion finished without model training.")

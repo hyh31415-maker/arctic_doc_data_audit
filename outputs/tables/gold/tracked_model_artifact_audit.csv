@@ -1,0 +1,5 @@
+file_path,artifact_type,is_documentation,is_model_output,recommended_action,action_taken,notes
+outputs/reports/model_readiness_report.md,documentation,True,False,retain,retained,no model/prediction/flux output detected
+outputs/tables/gold/model_input_table_hashes.csv,gold_hash_manifest,False,False,retain,retained,no model/prediction/flux output detected
+src/arctic_doc_data_audit/model_readiness.py,code_reference,False,False,retain,retained,no model/prediction/flux output detected
+tests/test_model_readiness.py,code_reference,False,False,retain,retained,no model/prediction/flux output detected
